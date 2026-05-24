@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AnestesiQuiz — Belajar Anestesiologi</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & VARIABLES ===== */
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0d1b2a;--deep:#1b3a5c;--steel:#2e6da4;
+  --accent:#e8a020;--accent2:#f5c85a;
+  --success:#1a7a4a;--danger:#c0392b;--warn:#e67e22;--info:#1a5c8a;
+  --bg:#eef2f7;--card:#fff;--border:#d0dbe8;
+  --text:#1a2535;--muted:#5a6a7e;
+  --sidebar-w:260px;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);}
+
+/* ===== LAYOUT ===== */
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+  width:var(--sidebar-w);min-width:var(--sidebar-w);
+  background:var(--navy);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  transition:transform 0.3s;
+  z-index:100;
+}
+.sidebar-logo{
+  padding:20px 18px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.logo-badge{
+  display:inline-block;
+  background:var(--accent);color:var(--navy);
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;font-weight:700;letter-spacing:1.5px;
+  padding:3px 10px;border-radius:20px;margin-bottom:10px;
+  text-transform:uppercase;
+}
+.logo-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:900;color:#fff;line-height:1.2;}
+.logo-title span{color:var(--accent2);}
+.logo-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;}
+
+.sidebar-section-label{
+  padding:14px 18px 6px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,0.3);
+}
+.sidebar-list{flex:1;overflow-y:auto;padding-bottom:8px;}
+.sidebar-list::-webkit-scrollbar{width:3px;}
+.sidebar-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:2px;}
+
+.bab-item{
+  margin:2px 10px;
+  border-radius:10px;
+  cursor:pointer;
+  transition:background 0.15s;
+  overflow:hidden;
+}
+.bab-item:hover .bab-item-inner{background:rgba(255,255,255,0.06);}
+.bab-item.active .bab-item-inner{background:rgba(232,160,32,0.15);border-left:3px solid var(--accent);}
+.bab-item-inner{padding:10px 14px;display:flex;align-items:center;gap:10px;}
+.bab-icon{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;
+}
+.bab-info{flex:1;min-width:0;}
+.bab-name{font-size:13px;font-weight:500;color:rgba(255,255,255,0.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bab-meta{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.bab-progress-mini{
+  width:100%;height:3px;background:rgba(255,255,255,0.1);
+  border-radius:2px;margin-top:6px;overflow:hidden;
+}
+.bab-progress-mini-fill{height:3px;background:var(--accent);border-radius:2px;transition:width 0.3s;}
+
+.sidebar-footer{
+  padding:12px 14px;
+  border-top:1px solid rgba(255,255,255,0.08);
+}
+.btn-upload{
+  width:100%;padding:10px 14px;
+  background:rgba(232,160,32,0.15);
+  border:1px solid rgba(232,160,32,0.3);
+  border-radius:10px;
+  color:var(--accent2);
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:500;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background 0.15s;
+}
+.btn-upload:hover{background:rgba(232,160,32,0.25);}
+
+/* ===== MAIN CONTENT ===== */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ===== TOPBAR ===== */
+.topbar{
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  padding:0 20px;
+  height:56px;
+  display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+}
+.topbar-menu{
+  width:36px;height:36px;border-radius:8px;
+  border:none;background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  display:none;
+}
+.topbar-menu svg{width:20px;height:20px;stroke:var(--muted);}
+.topbar-title{font-size:15px;font-weight:500;color:var(--text);flex:1;}
+.topbar-crumb{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+/* ===== CONTENT AREA ===== */
+.content{flex:1;overflow-y:auto;padding:20px;}
+.content::-webkit-scrollbar{width:4px;}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ===== DASHBOARD ===== */
+.dashboard-hero{
+  background:linear-gradient(135deg,var(--navy),var(--deep));
+  border-radius:16px;padding:28px 24px;
+  margin-bottom:20px;position:relative;overflow:hidden;
+}
+.dashboard-hero::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:200px;height:200px;border-radius:50%;
+  background:rgba(232,160,32,0.1);
+}
+.dashboard-hero h2{
+  font-family:'Playfair Display',serif;
+  font-size:22px;font-weight:900;color:#fff;
+  margin-bottom:6px;position:relative;z-index:1;
+}
+.dashboard-hero h2 span{color:var(--accent2);}
+.dashboard-hero p{font-size:13px;color:rgba(255,255,255,0.6);position:relative;z-index:1;}
+.dashboard-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  margin:16px 0 0;position:relative;z-index:1;
+}
+.dash-stat{
+  background:rgba(255,255,255,0.08);border-radius:10px;
+  padding:12px 10px;text-align:center;
+}
+.dash-stat-val{font-size:22px;font-weight:700;color:#fff;font-family:'Playfair Display',serif;}
+.dash-stat-lbl{font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+
+.section-heading{
+  font-size:13px;font-weight:500;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;letter-spacing:1px;
+  text-transform:uppercase;margin:0 0 12px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-heading::before{content:'';width:20px;height:2px;background:var(--accent);border-radius:2px;}
+
+.bab-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:24px;}
+.bab-card{
+  background:var(--card);border-radius:14px;
+  border:1px solid var(--border);
+  overflow:hidden;cursor:pointer;
+  transition:box-shadow 0.2s,transform 0.15s;
+  box-shadow:0 1px 4px rgba(13,27,42,0.05);
+}
+.bab-card:hover{box-shadow:0 4px 20px rgba(13,27,42,0.1);transform:translateY(-1px);}
+.bab-card-top{
+  display:flex;align-items:center;gap:14px;padding:16px 18px;
+}
+.bab-card-icon{
+  width:46px;height:46px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.bab-card-info{flex:1;}
+.bab-card-title{font-size:15px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.bab-card-sub{font-size:12px;color:var(--muted);}
+.bab-card-bottom{
+  border-top:1px solid var(--border);padding:10px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.progress-track{background:#e8edf5;border-radius:6px;height:6px;flex:1;margin:0 12px;overflow:hidden;}
+.progress-fill{height:6px;border-radius:6px;background:linear-gradient(90deg,var(--steel),var(--accent));transition:width 0.4s;}
+.progress-pct{font-size:11px;font-weight:600;color:var(--steel);font-family:'JetBrains Mono',monospace;min-width:32px;text-align:right;}
+.badge-done{
+  font-size:10px;padding:3px 10px;border-radius:20px;
+  background:#edfaf3;color:var(--success);
+  font-family:'JetBrains Mono',monospace;letter-spacing:0.5px;
+}
+.badge-new{
+  font-size:10px;padding:3px 10px;border-radius:20px;
+  background:#e8f0fa;color:var(--steel);
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* ===== UPLOAD ZONE ===== */
+.upload-zone{
+  border:2px dashed var(--border);border-radius:14px;
+  padding:32px 20px;text-align:center;
+  cursor:pointer;transition:border-color 0.2s,background 0.2s;
+  background:var(--card);
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--steel);background:#f0f5fb;}
+.upload-zone-icon{font-size:36px;margin-bottom:10px;}
+.upload-zone-title{font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px;}
+.upload-zone-sub{font-size:12px;color:var(--muted);line-height:1.6;}
+
+/* ===== BAB DETAIL / QUIZ ===== */
+.bab-detail{padding:0;}
+
+.bab-hero{
+  background:linear-gradient(135deg,var(--navy),var(--deep));
+  border-radius:16px;padding:22px 20px;margin-bottom:20px;
+  position:relative;overflow:hidden;
+}
+.bab-hero::before{
+  content:'';position:absolute;top:-30px;right:-30px;
+  width:150px;height:150px;border-radius:50%;
+  background:rgba(232,160,32,0.12);
+}
+.bab-hero-badge{
+  display:inline-block;background:var(--accent);color:var(--navy);
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:3px 10px;border-radius:20px;margin-bottom:10px;
+  position:relative;z-index:1;
+}
+.bab-hero h2{
+  font-family:'Playfair Display',serif;font-size:20px;font-weight:900;
+  color:#fff;line-height:1.3;margin-bottom:6px;position:relative;z-index:1;
+}
+.bab-hero p{font-size:12px;color:rgba(255,255,255,0.6);position:relative;z-index:1;}
+.bab-hero-stats{
+  display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;position:relative;z-index:1;
+}
+.bab-stat-pill{
+  background:rgba(255,255,255,0.1);
+  border-radius:20px;padding:5px 12px;
+  font-size:11px;color:rgba(255,255,255,0.8);
+  font-family:'JetBrains Mono',monospace;
+  display:flex;align-items:center;gap:6px;
+}
+.bab-stat-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+/* Scenario card */
+.scenario-card{
+  background:var(--card);border-radius:14px;border:1px solid var(--border);
+  overflow:hidden;margin-bottom:16px;
+  box-shadow:0 1px 6px rgba(13,27,42,0.05);
+}
+.scenario-card-hdr{
+  background:linear-gradient(90deg,var(--deep),var(--steel));
+  padding:12px 18px;display:flex;align-items:center;gap:8px;
+}
+.scenario-card-hdr span{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);
+}
+.scenario-card-hdr .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);}
+.scenario-body{padding:16px 18px;}
+.scenario-body p{font-size:13.5px;line-height:1.75;color:var(--text);margin-bottom:10px;}
+.scenario-body strong{color:var(--deep);}
+.vital-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+.vital-item{background:var(--bg);border-radius:10px;padding:10px 8px;text-align:center;border:1px solid var(--border);}
+.vital-item.alert{border-color:var(--danger);background:#fdf0ef;}
+.vital-item.warn{border-color:var(--warn);background:#fef9ec;}
+.vital-label{font-family:'JetBrains Mono',monospace;font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:4px;}
+.vital-val{font-size:17px;font-weight:700;color:var(--deep);line-height:1;}
+.vital-unit{font-size:8.5px;color:var(--muted);margin-top:2px;}
+.vital-item.alert .vital-val{color:var(--danger);}
+.vital-item.warn .vital-val{color:var(--warn);}
+
+/* Soal list in bab view */
+.soal-list{margin-bottom:20px;}
+.soal-row{
+  background:var(--card);border-radius:12px;border:1px solid var(--border);
+  padding:14px 16px;margin-bottom:8px;
+  display:flex;align-items:flex-start;gap:12px;
+  cursor:pointer;transition:box-shadow 0.15s,transform 0.1s;
+  box-shadow:0 1px 3px rgba(13,27,42,0.04);
+}
+.soal-row:hover{box-shadow:0 3px 12px rgba(13,27,42,0.08);transform:translateX(2px);}
+.soal-row.done{border-left:3px solid var(--success);}
+.soal-num{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--deep),var(--steel));
+  color:#fff;font-family:'Playfair Display',serif;
+  font-size:14px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.soal-row.done .soal-num{background:linear-gradient(135deg,var(--success),#27ae6e);}
+.soal-info{flex:1;}
+.soal-topic{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.soal-text{font-size:13.5px;color:var(--text);line-height:1.5;}
+.soal-status{font-size:10px;margin-top:4px;color:var(--success);font-family:'JetBrains Mono',monospace;}
+
+.btn-mulai{
+  width:100%;padding:15px;
+  background:linear-gradient(90deg,var(--deep),var(--steel));
+  color:#fff;border:none;border-radius:12px;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;
+  cursor:pointer;transition:opacity 0.2s,transform 0.15s;
+  box-shadow:0 4px 16px rgba(27,58,92,0.25);
+  margin-bottom:20px;
+}
+.btn-mulai:hover{opacity:0.88;transform:translateY(-1px);}
+
+/* ===== QUIZ VIEW ===== */
+.quiz-view{padding:0;}
+.quiz-progress-bar{
+  background:var(--card);border-radius:12px;padding:12px 16px;
+  margin-bottom:16px;border:1px solid var(--border);
+}
+.qpb-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.qpb-label{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.qpb-pct{font-size:12px;font-weight:600;color:var(--steel);font-family:'JetBrains Mono',monospace;}
+.qpb-track{background:#e8edf5;border-radius:6px;height:6px;overflow:hidden;}
+.qpb-fill{height:6px;border-radius:6px;background:linear-gradient(90deg,var(--steel),var(--accent));transition:width 0.4s;}
+
+.q-card{
+  background:var(--card);border-radius:14px;border:1px solid var(--border);
+  overflow:hidden;margin-bottom:16px;
+  box-shadow:0 2px 8px rgba(13,27,42,0.06);
+}
+.q-card-hdr{
+  background:linear-gradient(90deg,var(--deep),var(--steel));
+  padding:16px 18px;display:flex;gap:12px;align-items:flex-start;
+}
+.q-num-circle{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--accent);color:var(--navy);
+  font-family:'Playfair Display',serif;font-size:18px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.q-hdr-info{}
+.q-hdr-topic{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:4px;}
+.q-hdr-text{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#fff;line-height:1.4;}
+
+.q-body{padding:18px;}
+.essay-area{
+  width:100%;border:1.5px solid var(--border);border-radius:10px;
+  padding:12px 14px;font-family:'DM Sans',sans-serif;
+  font-size:14px;color:var(--text);line-height:1.65;
+  resize:vertical;min-height:120px;background:#fafbfd;
+  outline:none;transition:border-color 0.2s;
+}
+.essay-area:focus{border-color:var(--steel);background:#fff;}
+.essay-hint{font-size:11.5px;color:var(--muted);margin:8px 0 16px;display:flex;align-items:center;gap:6px;}
+.btn-submit{
+  width:100%;padding:13px;background:var(--accent);
+  color:var(--navy);border:none;border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;
+  cursor:pointer;transition:opacity 0.2s,transform 0.1s;
+}
+.btn-submit:hover:not(:disabled){opacity:0.85;transform:translateY(-1px);}
+.btn-submit:disabled{opacity:0.35;cursor:not-allowed;}
+
+/* ===== PEMBAHASAN ===== */
+.pembahasan{margin-top:16px;animation:fadeUp 0.35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+.answer-key{
+  background:linear-gradient(135deg,#edfaf3,#d5f0e3);
+  border:1px solid #8fd3b1;border-left:4px solid var(--success);
+  border-radius:12px;padding:14px 16px;margin-bottom:14px;
+}
+.ak-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--success);margin-bottom:6px;}
+.ak-body{font-size:13.5px;line-height:1.7;color:#1a4a2a;}
+.ak-body strong{color:#0f5a32;}
+
+.detail-block{
+  background:var(--card);border-radius:12px;border:1px solid var(--border);
+  overflow:hidden;margin-bottom:10px;
+}
+.db-hdr{
+  background:var(--bg);padding:9px 16px;
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--steel);
+  border-bottom:1px solid var(--border);
+}
+.db-body{padding:12px 16px;}
+.db-body p,.db-body li{font-size:13px;line-height:1.7;color:var(--text);margin-bottom:6px;}
+.db-body ul{padding-left:16px;}
+.db-body strong{color:var(--deep);}
+
+/* mini table */
+.tbl-wrap{overflow-x:auto;margin:8px 0;}
+.mini-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.mini-tbl thead tr{background:var(--deep);color:#fff;}
+.mini-tbl th{padding:7px 10px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;}
+.mini-tbl tbody tr:nth-child(odd){background:#f0f5fb;}
+.mini-tbl td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+
+.callout{border-radius:10px;padding:11px 14px;margin:10px 0;font-size:13px;line-height:1.65;display:flex;gap:10px;}
+.callout-icon{flex-shrink:0;font-size:17px;margin-top:1px;}
+.callout-danger{background:#fdf0ef;border:1px solid #f5b8b4;}
+.callout-warning{background:#fef9ec;border:1px solid #f5d68a;}
+.callout-info{background:#eef4fb;border:1px solid #b4d0ef;}
+.callout-success{background:#edfaf3;border:1px solid #8fd3b1;}
+.callout div{flex:1;}
+
+.cite-block{background:var(--navy);border-radius:10px;padding:11px 14px;margin-top:12px;border-left:3px solid var(--accent);}
+.cite-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:7px;}
+.cite-item{font-size:11.5px;color:rgba(255,255,255,0.7);line-height:1.5;margin-bottom:4px;font-family:'JetBrains Mono',monospace;}
+
+.btn-next{
+  width:100%;padding:14px;
+  background:linear-gradient(90deg,var(--deep),var(--steel));
+  color:#fff;border:none;border-radius:12px;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;
+  cursor:pointer;margin-top:20px;
+  box-shadow:0 4px 16px rgba(27,58,92,0.2);
+  transition:opacity 0.2s,transform 0.15s;
+}
+.btn-next:hover{opacity:0.88;transform:translateY(-1px);}
+
+/* ===== RESULT ===== */
+.result-view{padding:0;}
+.result-hero{
+  background:linear-gradient(135deg,var(--navy),var(--deep));
+  border-radius:16px;padding:28px 20px;text-align:center;
+  margin-bottom:20px;
+}
+.result-circle{
+  width:100px;height:100px;border-radius:50%;
+  background:rgba(255,255,255,0.1);border:3px solid var(--accent);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin:0 auto 16px;
+}
+.result-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:#fff;}
+.result-num-lbl{font-size:10px;color:rgba(255,255,255,0.55);font-family:'JetBrains Mono',monospace;}
+.result-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#fff;margin-bottom:6px;}
+.result-sub{font-size:13px;color:rgba(255,255,255,0.6);}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;}
+.rs-box{background:rgba(255,255,255,0.08);border-radius:10px;padding:12px 8px;text-align:center;}
+.rs-val{font-size:20px;font-weight:700;color:#fff;font-family:'Playfair Display',serif;}
+.rs-lbl{font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+
+.review-list{margin-bottom:20px;}
+.review-item{
+  background:var(--card);border-radius:12px;border:1px solid var(--border);
+  padding:12px 16px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;
+}
+.review-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--bg);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);flex-shrink:0;
+}
+.review-info{flex:1;}
+.review-q{font-size:13px;color:var(--text);line-height:1.45;margin-bottom:4px;}
+.review-topic{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.review-ans{font-size:11px;color:var(--success);margin-top:4px;font-style:italic;}
+.review-ans-text{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5;padding:6px 10px;background:var(--bg);border-radius:6px;font-style:italic;}
+
+.btn-ulang{
+  width:100%;padding:14px;
+  background:var(--accent);color:var(--navy);
+  border:none;border-radius:12px;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;
+  cursor:pointer;margin-bottom:8px;transition:opacity 0.2s;
+}
+.btn-ulang:hover{opacity:0.85;}
+.btn-back{
+  width:100%;padding:13px;
+  background:transparent;color:var(--muted);
+  border:1px solid var(--border);border-radius:12px;
+  font-family:'DM Sans',sans-serif;font-size:14px;
+  cursor:pointer;transition:background 0.15s;
+}
+.btn-back:hover{background:var(--bg);}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{text-align:center;padding:40px 20px;}
+.empty-icon{font-size:48px;margin-bottom:16px;}
+.empty-title{font-size:18px;font-weight:500;color:var(--text);margin-bottom:8px;}
+.empty-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;}
+
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--navy);color:#fff;padding:10px 20px;border-radius:20px;
+  font-size:13px;z-index:9999;transition:transform 0.3s;
+  white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.2);
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* ===== OVERLAY (mobile sidebar) ===== */
+.overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:640px){
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;
+    transform:translateX(-100%);
+  }
+  .sidebar.open{transform:translateX(0);}
+  .topbar-menu{display:flex;}
+  .overlay.show{display:block;}
+  .vital-grid{grid-template-columns:repeat(2,1fr);}
+  .dashboard-stats{grid-template-columns:repeat(3,1fr);}
+}
+
+/* ===== STATUS BAR ===== */
+.status-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:4px 12px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  transition:background 0.3s;
+}
+.status-bar.online{background:#edfaf3;color:#1a7a4a;border-bottom:1px solid #8fd3b1;}
+.status-bar.offline{background:#fff3e0;color:#e65100;border-bottom:1px solid #ffcc80;}
+.status-bar.config{background:#e8f4fb;color:#1565c0;border-bottom:1px solid #90caf9;}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.online .status-dot{background:#1a7a4a;}
+.offline .status-dot{background:#e65100;}
+.config .status-dot{background:#1565c0;}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="app">
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">Anestesiologi</div>
+    <div class="logo-title">Anestesi<span>Quiz</span></div>
+    <div class="logo-sub">Platform belajar berbasis kasus klinis</div>
+  </div>
+
+  <div class="sidebar-section-label">Daftar Bab</div>
+  <div class="sidebar-list" id="sidebarList">
+    <!-- filled by JS -->
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="btn-upload" onclick="triggerUpload()">
+      <span>📂</span> Upload Bab HTML
+    </button>
+    <input type="file" id="fileInput" accept=".html,.htm" multiple style="display:none" onchange="handleFiles(event)">
+  </div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar config" id="statusBar">
+    <span class="status-dot"></span>
+    <span id="statusText">Belum terhubung — isi SUPABASE_URL & KEY di file untuk mode online</span>
+  </div>
+  <div class="topbar">
+    <button class="topbar-menu" id="menuBtn" onclick="toggleSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    <div class="topbar-crumb" id="topbarCrumb"></div>
+  </div>
+
+  <div class="content" id="contentArea">
+    <!-- filled by JS -->
+  </div>
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== SUPABASE CONFIG =====
+// Ganti dua baris di bawah ini dengan nilai dari Supabase dashboard Anda
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+const sb = {
+  headers: {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+  },
+
+  async getBabs(){
+    try {
+      const r = await fetch(SUPABASE_URL+'/rest/v1/babs?select=*&order=created_at.asc', {headers:this.headers});
+      if(!r.ok) return null;
+      return await r.json();
+    } catch(e){ return null; }
+  },
+
+  async insertBab(bab){
+    try {
+      const body = {
+        id: bab.id,
+        title: bab.title,
+        subtitle: bab.subtitle||'',
+        icon: bab.icon||'📋',
+        color: bab.color||'#1b3a5c',
+        source: bab.source||'',
+        scenario: bab.scenario||'',
+        vitals: bab.vitals||[],
+        soals: bab.soals||[]
+      };
+      const r = await fetch(SUPABASE_URL+'/rest/v1/babs', {
+        method:'POST', headers:this.headers, body:JSON.stringify(body)
+      });
+      return r.ok;
+    } catch(e){ return false; }
+  },
+
+  async deleteBab(id){
+    try {
+      const r = await fetch(SUPABASE_URL+'/rest/v1/babs?id=eq.'+id, {
+        method:'DELETE', headers:this.headers
+      });
+      return r.ok;
+    } catch(e){ return false; }
+  },
+
+  async getProgress(userId){
+    try {
+      const r = await fetch(
+        SUPABASE_URL+'/rest/v1/user_progress?user_id=eq.'+encodeURIComponent(userId)+'&select=*',
+        {headers:this.headers}
+      );
+      if(!r.ok) return null;
+      return await r.json();
+    } catch(e){ return null; }
+  },
+
+  async upsertProgress(userId, babId, soalIdx, answerText){
+    try {
+      const body = {
+        user_id: userId,
+        bab_id: babId,
+        soal_idx: soalIdx,
+        answer_text: answerText,
+        done: true,
+        answered_at: new Date().toISOString()
+      };
+      const r = await fetch(SUPABASE_URL+'/rest/v1/user_progress', {
+        method:'POST',
+        headers: {...this.headers, 'Prefer':'resolution=merge-duplicates,return=representation'},
+        body: JSON.stringify(body)
+      });
+      return r.ok;
+    } catch(e){ return false; }
+  }
+};
+
+// ===== USER ID (anonymous persistent) =====
+function getUserId(){
+  let uid = localStorage.getItem('aq_uid');
+  if(!uid){ uid = 'user_'+Date.now()+'_'+Math.random().toString(36).slice(2); localStorage.setItem('aq_uid',uid); }
+  return uid;
+}
+const USER_ID = getUserId();
+
+// ===== STATE =====
+let state = {
+  babs: [],
+  currentBab: null,
+  currentSoal: 0,
+  answers: {},
+  view: 'dashboard',
+  online: false
+};
+
+// ===== LOAD STATE (Supabase-first, localStorage fallback) =====
+async function loadState(){
+  // selalu load localStorage dulu sebagai fallback cepat
+  try {
+    const s = localStorage.getItem('anestesiquiz_v2');
+    if(s){ const p = JSON.parse(s); state.babs = p.babs||[]; state.answers = p.answers||{}; }
+  } catch(e){}
+
+  // coba load dari Supabase jika sudah dikonfigurasi
+  if(SUPABASE_URL !== 'YOUR_SUPABASE_URL'){
+    try {
+      const babs = await sb.getBabs();
+      if(babs && babs.length > 0){
+        // merge: pakai Supabase sebagai sumber utama bab
+        state.babs = babs;
+        state.online = true;
+      }
+      const progress = await sb.getProgress(USER_ID);
+      if(progress){
+        progress.forEach(p=>{
+          if(!state.answers[p.bab_id]) state.answers[p.bab_id]={};
+          state.answers[p.bab_id][p.soal_idx]={text:p.answer_text||'',done:p.done};
+        });
+      }
+    } catch(e){ console.warn('Supabase tidak tersedia, pakai mode offline'); }
+  }
+}
+
+function saveStateLocal(){
+  try{ localStorage.setItem('anestesiquiz_v2', JSON.stringify({babs:state.babs,answers:state.answers})); }catch(e){}
+}
+
+async function saveState(){
+  saveStateLocal();
+}
+
+async function saveBabOnline(bab){
+  if(!state.online) return;
+  await sb.insertBab(bab);
+}
+
+async function saveProgressOnline(babId, soalIdx, text){
+  if(!state.online) return;
+  await sb.upsertProgress(USER_ID, babId, soalIdx, text);
+}
+
+
+// ===== DEMO BAB =====
+const DEMO_BAB = {
+  id:'bab_demo',
+  title:'Tatalaksana Jalan Napas',
+  subtitle:'Obesitas Morbid & OSA Derajat 3',
+  icon:'🫁',
+  color:'#1b3a5c',
+  source:'airway_obesitas_osa.html (demo)',
+  scenario:'Laki-laki <strong>48 tahun</strong>, BB 138 kg, TB 168 cm (<strong>BMI 48,9 kg/m²</strong>), dijadwalkan laparoskopi kolesistektomi elektif. Riwayat <strong>OSA derajat 3 berat</strong> (AHI 52 kejadian/jam), CPAP 10 cmH₂O — tidak teratur. Juga menderita hipertensi, DM tipe 2, dan sindrom hipoventilasi obesitas.<br><br>Evaluasi pra-anestesia: Mallampati IV, lingkar leher 48 cm, jarak tiro-mental 5 cm, pembukaan mulut 3 jari, fleksi-ekstensi leher terbatas. SpO₂ nadir saat tidur <strong>72%</strong>.',
+  vitals:[
+    {label:'BMI',val:'48.9',unit:'kg/m²',cls:'warn'},
+    {label:'AHI',val:'52',unit:'kejadian/jam',cls:'alert'},
+    {label:'SpO₂ Nadir',val:'72%',unit:'saat tidur',cls:'alert'},
+    {label:'Ling. Leher',val:'48',unit:'cm',cls:'warn'},
+    {label:'Mallampati',val:'IV',unit:'kelas',cls:'warn'},
+    {label:'Tiro-Mental',val:'5',unit:'cm',cls:'warn'},
+  ],
+  soals:[
+    {
+      topic:'Pertanyaan 1 · Diagnosis & Patofisiologi',
+      text:'Jelaskan mengapa pasien obesitas morbid dengan OSA berat merupakan pasien "high-risk airway" dan bagaimana patofisiologi OSA memengaruhi risiko perioperatif?',
+      inti:'Pasien ini merupakan <strong>anticipated difficult airway</strong> sekaligus memiliki risiko tinggi komplikasi respirasi perioperatif akibat interaksi antara anatomi jalan napas yang terganggu, cadangan fungsional paru yang sangat terbatas, dan respons fisiologis terhadap anestesia yang diperburuk oleh OSA.',
+      poin:[
+        {label:'Patofisiologi OSA pada Obesitas',items:['<strong>Deposisi lemak parafaring:</strong> menyempitkan lumen jalan napas dan meningkatkan kolapsibilitas faringeal.','<strong>Beban mekanik diafragma:</strong> lemak intraabdominal mendorong diafragma ke atas, FRC turun hingga 50%.','<strong>Disfungsi otot dilator faring:</strong> hipoksia intermiten mengganggu otot genioglosus & tensor veli palatini.','<strong>Loop gain tinggi:</strong> respons kemosensorik tidak stabil → siklus apnea memanjang.']},
+        {label:'Klasifikasi OSA & Perubahan Fisiologi Paru',table:{head:['Parameter','Perubahan','Dampak Klinis'],rows:[['FRC','↓ 30–50%','Desaturasi cepat saat apnea'],['ERV','↓↓','Air trapping, closing capacity > FRC'],['Konsumsi O₂','↑','Cadangan O₂ cepat habis'],['AHI ≥30 (pasien: 52)','Berat / Derajat 3','ICU/HDU wajib']]}}
+      ],
+      callout:{type:'danger',icon:'⚠️',text:'<strong>Poin Kritis:</strong> Setelah induksi & paralisis, waktu aman apnea hanya <strong>1–3 menit</strong> (vs 5–10 menit pasien normal) — bahkan setelah preoksigenasi optimal.'},
+      refs:['Butterworth JF IV. Morgan & Mikhail\'s Clinical Anesthesiology. 7th ed. 2022. Ch. 44.','Miller RD. Miller\'s Anesthesia. 9th ed. Ch. 71.','Chung F, et al. STOP-Bang. Chest. 2016;149(3):631–638.']
+    },
+    {
+      topic:'Pertanyaan 2 · Penilaian Pra-Anestesia',
+      text:'Bagaimana melakukan penilaian pra-anestesia yang komprehensif dan apa saja alat ukur yang digunakan untuk mengidentifikasi dan mengkuantifikasi risiko jalan napas pada pasien ini?',
+      inti:'Penilaian pra-anestesia harus mencakup evaluasi multidimensi: riwayat klinis OSA, skor prediksi kesulitan intubasi, pemeriksaan fisik terstruktur, uji fungsional paru, dan penilaian kardiovaskular.',
+      poin:[
+        {label:'STOP-BANG Pasien Ini (Skor 7/8)',table:{head:['Komponen','Pasien'],rows:[['S – Snoring','✅ Ya'],['T – Tired','✅ Ya'],['O – Observed apnea','✅ Ya'],['P – Pressure (HT)','✅ Ya'],['B – BMI > 35','✅ Ya (48.9)'],['A – Age > 50','❌ Tidak (48 th)'],['N – Neck > 43cm','✅ Ya (48 cm)'],['G – Gender (L)','✅ Ya'],['TOTAL','7/8 → Risiko Sangat Tinggi']]}},
+        {label:'Mnemonic LEMON',items:['<strong>L</strong>ook externally — obesitas, leher pendek-tebal','<strong>E</strong>valuate 3-3-2 rule — jarak tiro-mental borderline (5 cm)','<strong>M</strong>allampati — Kelas IV, uvula tidak terlihat','<strong>O</strong>bstruction/Obesity — faktor independen kesulitan laringoskopi','<strong>N</strong>eck mobility — terbatas; sniffing position tidak optimal']},
+        {label:'Evaluasi Sistemik',items:['<strong>EKG:</strong> RVH, aritmia, iskemia','<strong>ABG:</strong> evaluasi hiperkapnia kronis (PaCO₂ > 45 mmHg = OHS)','<strong>Spirometri:</strong> pola restriktif pada OHS','<strong>Lab:</strong> polisitemia (Hb↑), glukosa, fungsi tiroid']}
+      ],
+      callout:{type:'warning',icon:'⚡',text:'<strong>OHS:</strong> Didiagnosis bila BMI ≥30 + PaCO₂ ≥45 mmHg. Pasien ini WAJIB evaluasi ABG untuk eksklusi OHS yang memperburuk risiko secara signifikan.'},
+      refs:['ASA Difficult Airway Guidelines. Anesthesiology. 2022;136(1):31–81.','Reed MJ. The LEMON approach. Emerg Med J. 2004;21:248.','Morgan & Mikhail Ch. 19 & 44.']
+    },
+    {
+      topic:'Pertanyaan 3 · Manajemen Intraoperatif',
+      text:'Jelaskan secara lengkap algoritma dan strategi tatalaksana jalan napas intraoperatif pada pasien ini, mulai dari persiapan, preoksigenasi, teknik intubasi, hingga pemilihan agen anestesia yang tepat.',
+      inti:'Manajemen jalan napas mengikuti prinsip "Plan A, B, C, D" dari ASA Difficult Airway Algorithm 2022, dengan fokus pada preoksigenasi optimal, posisi yang benar, dan kesiapan penuh untuk failed intubation <em>sebelum</em> induksi dimulai.',
+      poin:[
+        {label:'SOAP-ME Checklist',table:{head:['Komponen','Detail'],rows:[['S – Suction','Kuat, siap di sisi kepala'],['O – Oxygen','NRB, CPAP/NIV standby'],['A – Airway','VL, FOB, ETT berbagai ukuran, SGA, bougie, kit krikotirotomi'],['P – Pharmacology','Propofol/ketamin, suksinilkolin/rokuronum, sugammadex, vasopressor'],['M – Monitoring','EKG, NIBP, SpO₂, EtCO₂, TOF'],['E – Equipment','Meja ramping position']]}},
+        {label:'Dosis Obat (Berbasis Berat Badan)',table:{head:['Obat','Dasar Dosis','Catatan'],rows:[['Propofol (induksi)','LBW','1–2 mg/kg LBW; titrasi pelan'],['Suksinilkolin','TBW','1.5 mg/kg TBW'],['Rokuronum (RSI)','LBW','1.2 mg/kg LBW'],['Sugammadex','TBW','16 mg/kg TBW (emergensi)'],['Fentanil','LBW','Minimalisasi! Multimodal analgesia'],['Midazolam','LBW','HINDARI pada OSA berat']]}},
+        {label:'VL vs Laringoskopi Langsung',items:['<strong>Videolaringoskopi (VL)</strong> adalah pilihan pertama','First-pass success VL: ~85–95% vs DL: ~70–75% pada difficult airway','Anticipated Difficult Airway → pertimbangkan <strong>Awake FOB atau Awake VL</strong>','LBW pasien ≈ <strong>72 kg</strong> (formula Devine)']}
+      ],
+      callout:{type:'info',icon:'🔑',text:'Plan A: VL → Plan B: SGA (ProSeal/LMA Supreme) → Plan C: Krikotirotomi bedah. Jangan > 2 upaya intubasi tanpa memberikan oksigenasi!'},
+      refs:['ASA Difficult Airway Guidelines. Anesthesiology. 2022;136:31–81.','Morgan & Mikhail Ch. 19 & 44. 7th ed.','Miller\'s Anesthesia Ch. 55. 9th ed.']
+    },
+    {
+      topic:'Pertanyaan 4 · Ventilasi Intraoperatif',
+      text:'Bagaimana strategi ventilasi mekanik intraoperatif yang optimal untuk pasien obesitas morbid dengan OSA, dan apa parameter ventilasi yang perlu dimonitor?',
+      inti:'Ventilasi pasien obesitas morbid memerlukan strategi khusus: mempertahankan oksigenasi adekuat, mencegah atelektasis, meminimalkan VALI, dan mempertahankan hemodinamik stabil.',
+      poin:[
+        {label:'Lung-Protective Ventilation — Parameter Target',table:{head:['Parameter','Target','Alasan'],rows:[['Tidal Volume (Vt)','6–8 mL/kg <strong>IBW</strong>','Berdasarkan TBW → barotrauma!'],['PEEP','8–12 cmH₂O','Rekruitmen alveoli, cegah atelektasis'],['Recruitment maneuver','30 cmH₂O × 30 detik','Buka alveoli kolaps pasca-intubasi'],['FiO₂','Turunkan bertahap; SpO₂ ≥ 95%','FiO₂ tinggi → atelektasis absorpsi'],['Plateau pressure','< 28 cmH₂O','Indikator lung stress'],['Driving pressure','< 15 cmH₂O (Pplat − PEEP)','Prediktor outcome paru terbaik']]}},
+        {label:'Perhitungan IBW & Vt',items:['<strong>Formula Devine ♂:</strong> IBW = 50 + 2.3 × (tinggi inci − 60)','Pasien 168 cm = 66 inci → IBW = 50 + 2.3 × 6 = <strong>~63.8 kg</strong>','Vt target = 6 × 63.8 = <strong>~383 mL</strong> (bukan 6 × 138 = 828 mL yang berbahaya!)']},
+        {label:'TIVA vs Agen Volatil',table:{head:['Aspek','Volatil','TIVA (Propofol)'],rows:[['Recovery','Desfluran tercepat (koef. 0.45)','Predictable recovery'],['Akumulasi','Desfluran minimal','Dosis LBW, akumulasi minimal'],['Rekomendasi','Desfluran/sevofluran bisa digunakan','<strong>TIVA lebih disukai</strong> pada OSA berat']]}}
+      ],
+      callout:{type:'danger',icon:'⚠️',text:'<strong>KRITIS:</strong> Laparoskopi + pneumoperitoneum CO₂ + Trendelenburg → beban ekstra pada diafragma. Naikkan PEEP dan monitor Pplat ketat selama fase ini.'},
+      refs:['Morgan & Mikhail Ch. 44 & 57. 7th ed.','Futier E, et al. Low-tidal-volume ventilation. NEJM. 2013;369:428.','Barash PG. Clinical Anesthesia. 8th ed. Ch. 40.']
+    },
+    {
+      topic:'Pertanyaan 5 · Manajemen Pascaoperasi',
+      text:'Apa saja komplikasi respirasi pascaoperasi yang dapat terjadi pada pasien ini, bagaimana kriteria ekstubasi yang aman, dan apa strategi manajemen nyeri yang direkomendasikan?',
+      inti:'Fase pascaoperasi adalah periode <strong>PALING BERBAHAYA</strong> pada pasien OSA. Risiko komplikasi respirasi meningkat 2–4× lipat dalam 24 jam pertama akibat efek residu opioid, relaksan, dan sedatif yang berinteraksi dengan mekanisme OSA.',
+      poin:[
+        {label:'Kriteria Ekstubasi Aman',table:{head:['Kriteria','Target','Catatan OSA'],rows:[['Kesadaran','Sadar penuh, ikuti perintah','MUST fully awake'],['TOF ratio','≥ 0.9','Gunakan sugammadex bila ragu'],['Vt spontan','≥ 5 mL/kg IBW','Uji napas spontan ≥ 5 menit'],['SpO₂','≥ 95% dengan O₂ ≤ 4 L/mnt','< 90% saat bangun → tunda'],['Posisi','Semi-fowler 30–45°','Pertahankan FRC pasca-ekstubasi']]}},
+        {label:'Manajemen Nyeri Multimodal (Opioid-Sparing)',items:['<strong>Parasetamol</strong> 1 g IV tiap 6 jam — opioid-sparing 20–30%, aman OSA','<strong>NSAID (Ketorolak)</strong> 15–30 mg IV — opioid-sparing kuat','<strong>Ketamine dosis rendah</strong> 0.1–0.3 mg/kg IV — NMDA antagonis; pertahankan tonus jalan napas','<strong>Dexmedetomidine</strong> 0.2–0.7 mcg/kg/jam — sedasi tanpa depresi napas','<strong>Blok regional</strong> (TAP block, paravertebral) — analgesia tanpa efek sistemik']},
+        {label:'Level Perawatan Pascaoperasi',table:{head:['Level','Kriteria'],rows:[['ICU','OHS + hiperkapnia; gagal napas; hemodinamik tidak stabil'],['★ HDU (pasien ini)','OSA berat AHI ≥30; prosedur sedang-mayor; monitoring SpO₂ kontinu'],['Bangsal + monitor','OSA ringan-sedang; prosedur minor; patuh CPAP']]}}
+      ],
+      callout:{type:'success',icon:'✅',text:'Pasien ini <strong>HARUS dirawat di HDU minimum</strong> dengan monitoring SpO₂ kontinu 24 jam pertama. CPAP dilanjutkan segera setelah cukup sadar.'},
+      refs:['Morgan & Mikhail Ch. 44 & 56. 7th ed.','Seet E, Chung F. Can J Anaesth. 2010;57:849–864.','Stoelting RK. Pharmacology in Anesthetic Practice. 5th ed.']
+    }
+  ]
+};
+
+if(state.babs.length === 0){
+  state.babs.push(DEMO_BAB);
+  saveState();
+}
+
+// ===== BAB COLORS =====
+const BAB_COLORS = [
+  '#1b3a5c','#1a7a4a','#8e1a0e','#5a1e8e','#1a5c8a','#7a4a1a','#1a4a5c','#4a1a7a'
+];
+const BAB_ICONS = ['🫁','🫀','💉','🧠','🩺','⚕️','🔬','📋'];
+
+// ===== PARSER =====
+function parseHTML(html, filename){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html,'text/html');
+
+  // title
+  let title = doc.querySelector('title')?.textContent || filename.replace('.html','');
+  title = title.replace('Tatalaksana ','').substring(0,50);
+
+  // scenario
+  let scenario = '';
+  const scenBox = doc.querySelector('.scenario-box');
+  if(scenBox){
+    const paras = scenBox.querySelectorAll('p');
+    paras.forEach(p=>{ scenario += p.innerHTML + '<br><br>'; });
+  }
+
+  // vitals
+  let vitals = [];
+  doc.querySelectorAll('.vital-item').forEach(vi=>{
+    const label = vi.querySelector('.label')?.textContent?.trim() || vi.querySelector('.vital-label')?.textContent?.trim() || '';
+    const val   = vi.querySelector('.value')?.textContent?.trim() || vi.querySelector('.vital-val')?.textContent?.trim() || '';
+    const unit  = vi.querySelector('.unit')?.textContent?.trim()  || vi.querySelector('.vital-unit')?.textContent?.trim() || '';
+    const cls   = vi.classList.contains('alert') ? 'alert' : vi.classList.contains('warn') ? 'warn' : '';
+    if(label && val) vitals.push({label,val,unit,cls});
+  });
+
+  // questions
+  let soals = [];
+  doc.querySelectorAll('.question-card').forEach(card=>{
+    const topicEl = card.querySelector('.q-label');
+    const textEl  = card.querySelector('.q-title');
+    const intiEl  = card.querySelector('.answer-intro');
+    if(!textEl) return;
+
+    const topic = topicEl?.textContent?.trim() || '';
+    const text  = textEl?.textContent?.trim() || '';
+    const inti  = intiEl?.innerHTML || '';
+
+    // poin - section labels + following content
+    let poin = [];
+    const body = card.querySelector('.q-body');
+    if(body){
+      const sectionLabels = body.querySelectorAll('.section-label');
+      sectionLabels.forEach(sl=>{
+        const lbl = sl.textContent.trim();
+        let items=[], tableData=null;
+        let el = sl.nextElementSibling;
+        while(el && !el.classList.contains('section-label') && !el.classList.contains('citation-box') && !el.classList.contains('callout')){
+          if(el.tagName==='TABLE'||el.querySelector('table')){
+            const tbl = el.tagName==='TABLE'?el:el.querySelector('table');
+            const head=[], rows=[];
+            tbl.querySelectorAll('thead th').forEach(th=>head.push(th.textContent.trim()));
+            tbl.querySelectorAll('tbody tr').forEach(tr=>{
+              const r=[];
+              tr.querySelectorAll('td').forEach(td=>r.push(td.innerHTML.trim()));
+              if(r.length) rows.push(r);
+            });
+            if(head.length) tableData={head,rows};
+          } else if(el.classList&&el.classList.contains('step-list')){
+            el.querySelectorAll('.step-content').forEach(sc=>items.push(sc.innerHTML.trim()));
+          } else if(el.tagName==='UL'||el.tagName==='OL'){
+            el.querySelectorAll('li').forEach(li=>items.push(li.innerHTML.trim()));
+          }
+          el=el.nextElementSibling;
+        }
+        if(items.length||tableData) poin.push({label:lbl,items:items.length?items:undefined,table:tableData||undefined});
+      });
+    }
+
+    // callout
+    let callout = null;
+    const calloutEl = card.querySelector('.callout-danger,.callout-warning,.callout-info,.callout-success');
+    if(calloutEl){
+      const icon = calloutEl.querySelector('.callout-icon')?.textContent||'ℹ️';
+      const bodyEl = calloutEl.querySelector('div:not(.callout-icon)');
+      const text2 = bodyEl ? bodyEl.innerHTML : '';
+      const type = calloutEl.classList.contains('callout-danger')?'danger':
+                   calloutEl.classList.contains('callout-warning')?'warning':
+                   calloutEl.classList.contains('callout-success')?'success':'info';
+      callout = {type,icon:icon.trim(),text:text2};
+    }
+
+    // refs
+    let refs = [];
+    card.querySelectorAll('.citation-box .cite-item, .cite-item').forEach(ci=>{
+      refs.push(ci.textContent.replace('•','').trim());
+    });
+
+    soals.push({topic,text,inti,poin,callout,refs});
+  });
+
+  if(soals.length===0){
+    // fallback: cari dari h3, heading, dll
+    doc.querySelectorAll('h2,h3').forEach(h=>{
+      const t=h.textContent.trim();
+      if(t.length>20&&t.length<300){ soals.push({topic:'Pertanyaan',text:t,inti:'',poin:[],callout:null,refs:[]}); }
+    });
+  }
+
+  return {
+    id:'bab_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+    title,
+    subtitle:filename,
+    icon: BAB_ICONS[state.babs.length % BAB_ICONS.length],
+    color: BAB_COLORS[state.babs.length % BAB_COLORS.length],
+    source:filename,
+    scenario,
+    vitals,
+    soals
+  };
+}
+
+// ===== FILE UPLOAD =====
+function triggerUpload(){ document.getElementById('fileInput').click(); }
+
+function handleFiles(e){
+  const files = Array.from(e.target.files);
+  if(!files.length) return;
+  let loaded = 0;
+  files.forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      try{
+        const bab = parseHTML(ev.target.result, file.name);
+        if(bab.soals.length===0){
+          showToast('⚠️ Tidak ada soal terdeteksi di '+file.name);
+        } else {
+          // check duplicate
+          const exists = state.babs.find(b=>b.source===file.name);
+          if(exists){
+            showToast('⚠️ File '+file.name+' sudah ada');
+          } else {
+            state.babs.push(bab);
+            saveState();
+            renderSidebar();
+            showToast('✅ Bab "'+bab.title+'" berhasil ditambahkan ('+bab.soals.length+' soal)');
+            loaded++;
+          }
+        }
+      }catch(err){
+        showToast('❌ Gagal memproses '+file.name);
+      }
+    };
+    reader.readAsText(file,'UTF-8');
+  });
+  e.target.value='';
+}
+
+// drag & drop on upload zone
+function setupDrop(el){
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag');});
+  el.addEventListener('dragleave',()=>el.classList.remove('drag'));
+  el.addEventListener('drop',e=>{
+    e.preventDefault();el.classList.remove('drag');
+    const files = Array.from(e.dataTransfer.files).filter(f=>f.name.endsWith('.html')||f.name.endsWith('.htm'));
+    if(files.length){
+      const fakeEv = {target:{files,value:''}};
+      handleFiles(fakeEv);
+    }
+  });
+}
+
+// ===== PROGRESS =====
+function getBabProgress(bab){
+  const ans = state.answers[bab.id]||{};
+  const done = Object.keys(ans).filter(k=>ans[k]&&ans[k].done).length;
+  return {done, total:bab.soals.length, pct: bab.soals.length? Math.round(done/bab.soals.length*100):0};
+}
+
+// ===== SIDEBAR =====
+function renderSidebar(){
+  const list = document.getElementById('sidebarList');
+  list.innerHTML = '';
+
+  // Dashboard item
+  const dashItem = document.createElement('div');
+  dashItem.className='bab-item'+(state.view==='dashboard'?' active':'');
+  dashItem.innerHTML=`<div class="bab-item-inner"><div class="bab-icon" style="background:rgba(232,160,32,0.15);">🏠</div><div class="bab-info"><div class="bab-name">Dashboard</div><div class="bab-meta">${state.babs.length} bab tersedia</div></div></div>`;
+  dashItem.onclick=()=>showDashboard();
+  list.appendChild(dashItem);
+
+  state.babs.forEach((bab,i)=>{
+    const prog = getBabProgress(bab);
+    const item = document.createElement('div');
+    item.className='bab-item'+(state.currentBab===bab.id&&state.view!=='dashboard'?' active':'');
+    item.innerHTML=`
+      <div class="bab-item-inner">
+        <div class="bab-icon" style="background:${bab.color}22;">${bab.icon}</div>
+        <div class="bab-info">
+          <div class="bab-name">${bab.title}</div>
+          <div class="bab-meta">${prog.done}/${prog.total} soal${prog.pct===100?' · ✅':''}</div>
+          <div class="bab-progress-mini"><div class="bab-progress-mini-fill" style="width:${prog.pct}%"></div></div>
+        </div>
+      </div>`;
+    item.onclick=()=>showBabDetail(bab.id);
+    list.appendChild(item);
+  });
+}
+
+// ===== RENDER PEMBAHASAN =====
+function renderPembahasan(soal){
+  let html=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;font-size:16px;">📋</div>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--success);">Pembahasan Lengkap</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);">Kunci Jawaban & Penjelasan</div>
+      </div>
+    </div>
+    <div class="answer-key">
+      <div class="ak-label">Jawaban Inti</div>
+      <div class="ak-body">${soal.inti||'Lihat penjelasan di bawah.'}</div>
+    </div>`;
+
+  (soal.poin||[]).forEach(p=>{
+    html+=`<div class="detail-block"><div class="db-hdr">${p.label}</div><div class="db-body">`;
+    if(p.items&&p.items.length){
+      html+='<ul>'+p.items.map(i=>`<li>${i}</li>`).join('')+'</ul>';
+    }
+    if(p.table){
+      html+=`<div class="tbl-wrap"><table class="mini-tbl"><thead><tr>${p.table.head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+      p.table.rows.forEach(r=>{html+='<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>';});
+      html+='</tbody></table></div>';
+    }
+    html+=`</div></div>`;
+  });
+
+  if(soal.callout){
+    const ct=soal.callout;
+    html+=`<div class="callout callout-${ct.type}"><span class="callout-icon">${ct.icon}</span><div>${ct.text}</div></div>`;
+  }
+
+  if(soal.refs&&soal.refs.length){
+    html+=`<div class="cite-block"><div class="cite-lbl">📚 Referensi</div>`;
+    soal.refs.forEach(r=>{html+=`<div class="cite-item">• ${r}</div>`;});
+    html+=`</div>`;
+  }
+
+  return html;
+}
+
+// ===== VIEWS =====
+function showDashboard(){
+  state.view='dashboard';
+  state.currentBab=null;
+  document.getElementById('topbarTitle').textContent='Dashboard';
+  document.getElementById('topbarCrumb').textContent='';
+  renderSidebar();
+  closeSidebar();
+
+  const totalSoals = state.babs.reduce((a,b)=>a+b.soals.length,0);
+  const totalDone  = state.babs.reduce((a,b)=>{
+    const p=getBabProgress(b);return a+p.done;
+  },0);
+  const totalPct = totalSoals? Math.round(totalDone/totalSoals*100):0;
+
+  let babCards = state.babs.map(bab=>{
+    const prog=getBabProgress(bab);
+    const badge = prog.pct===100
+      ? `<span class="badge-done">✅ Selesai</span>`
+      : prog.done===0 ? `<span class="badge-new">Baru</span>` : `<span class="badge-new">${prog.done}/${prog.total}</span>`;
+    return `<div class="bab-card" onclick="showBabDetail('${bab.id}')">
+      <div class="bab-card-top">
+        <div class="bab-card-icon" style="background:${bab.color}18;font-size:24px;">${bab.icon}</div>
+        <div class="bab-card-info">
+          <div class="bab-card-title">${bab.title}</div>
+          <div class="bab-card-sub">${bab.soals.length} soal · ${bab.subtitle||bab.source}</div>
+        </div>
+        ${badge}
+      </div>
+      <div class="bab-card-bottom">
+        <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${prog.done}/${prog.total}</div>
+        <div class="progress-track"><div class="progress-fill" style="width:${prog.pct}%"></div></div>
+        <div class="progress-pct">${prog.pct}%</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  let uploadSection = '';
+  if(state.babs.length<2){
+    uploadSection=`
+      <div class="section-heading" style="margin-top:24px;">Tambah Bab Baru</div>
+      <div class="upload-zone" id="uploadZone" onclick="triggerUpload()">
+        <div class="upload-zone-icon">📂</div>
+        <div class="upload-zone-title">Upload file HTML soal</div>
+        <div class="upload-zone-sub">Seret & lepas file HTML ke sini, atau klik untuk memilih.<br>Format yang didukung: file HTML dengan kelas <code>question-card</code> / <code>q-title</code>.</div>
+      </div>`;
+  }
+
+  document.getElementById('contentArea').innerHTML=`
+    <div class="dashboard-hero">
+      <h2>Selamat Belajar, <span>Dokter! 👨‍⚕️</span></h2>
+      <p>Platform belajar anestesiologi berbasis kasus klinis. Upload file HTML soal dan mulai berlatih.</p>
+      <div class="dashboard-stats">
+        <div class="dash-stat"><div class="dash-stat-val">${state.babs.length}</div><div class="dash-stat-lbl">Bab</div></div>
+        <div class="dash-stat"><div class="dash-stat-val">${totalSoals}</div><div class="dash-stat-lbl">Total Soal</div></div>
+        <div class="dash-stat"><div class="dash-stat-val">${totalPct}%</div><div class="dash-stat-lbl">Progres</div></div>
+      </div>
+    </div>
+    <div class="section-heading">Daftar Bab</div>
+    <div class="bab-grid">${babCards||'<p style="color:var(--muted);font-size:13px;padding:12px 0;">Belum ada bab. Upload file HTML soal untuk memulai.</p>'}</div>
+    ${uploadSection}
+  `;
+
+  const uploadZone = document.getElementById('uploadZone');
+  if(uploadZone) setupDrop(uploadZone);
+}
+
+function showBabDetail(babId){
+  const bab = state.babs.find(b=>b.id===babId);
+  if(!bab) return;
+  state.view='bab';
+  state.currentBab=babId;
+  document.getElementById('topbarTitle').textContent=bab.title;
+  document.getElementById('topbarCrumb').textContent=bab.soals.length+' soal';
+  renderSidebar();
+  closeSidebar();
+
+  const prog = getBabProgress(bab);
+  const ans = state.answers[babId]||{};
+
+  let vitalsHtml='';
+  if(bab.vitals&&bab.vitals.length){
+    vitalsHtml=`<div class="vital-grid">${bab.vitals.map(v=>`
+      <div class="vital-item ${v.cls||''}">
+        <div class="vital-label">${v.label}</div>
+        <div class="vital-val">${v.val}</div>
+        <div class="vital-unit">${v.unit}</div>
+      </div>`).join('')}</div>`;
+  }
+
+  let scenarioHtml='';
+  if(bab.scenario){
+    scenarioHtml=`
+      <div class="scenario-card">
+        <div class="scenario-card-hdr"><div class="dot"></div><span>Skenario Kasus Klinis</span></div>
+        <div class="scenario-body"><p>${bab.scenario}</p>${vitalsHtml}</div>
+      </div>`;
+  }
+
+  const soalRows = bab.soals.map((s,i)=>{
+    const isDone = ans[i]&&ans[i].done;
+    return `<div class="soal-row ${isDone?'done':''}" onclick="startQuiz('${babId}',${i})">
+      <div class="soal-num">${i+1}</div>
+      <div class="soal-info">
+        <div class="soal-topic">${s.topic}</div>
+        <div class="soal-text">${s.text.substring(0,90)}…</div>
+        ${isDone?`<div class="soal-status">✅ Sudah dijawab</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  const btnLabel = prog.done===prog.total&&prog.total>0 ? '↺ Ulangi Semua Soal' : prog.done===0 ? '▶ Mulai Quiz' : '▶ Lanjutkan Quiz';
+
+  document.getElementById('contentArea').innerHTML=`
+    <div class="bab-detail">
+      <div class="bab-hero" style="background:linear-gradient(135deg,${bab.color},${bab.color}cc);">
+        <div class="bab-hero-badge">${bab.icon} Anestesiologi</div>
+        <h2>${bab.title}</h2>
+        <p>${bab.subtitle||bab.source}</p>
+        <div class="bab-hero-stats">
+          <div class="bab-stat-pill"><span class="dot"></span>${bab.soals.length} Soal Essay</div>
+          <div class="bab-stat-pill"><span class="dot"></span>${prog.done} Selesai</div>
+          <div class="bab-stat-pill"><span class="dot"></span>${prog.pct}% Progres</div>
+        </div>
+      </div>
+      ${scenarioHtml}
+      <button class="btn-mulai" onclick="startQuiz('${babId}',${prog.done<prog.total?prog.done:0})">${btnLabel}</button>
+      <div class="section-heading">Daftar Soal</div>
+      <div class="soal-list">${soalRows}</div>
+    </div>`;
+}
+
+function startQuiz(babId, startIdx){
+  const bab = state.babs.find(b=>b.id===babId);
+  if(!bab) return;
+  state.view='quiz';
+  state.currentBab=babId;
+  state.currentSoal=startIdx||0;
+  renderSidebar();
+  showQuizSoal(babId, state.currentSoal);
+}
+
+function showQuizSoal(babId, idx){
+  const bab = state.babs.find(b=>b.id===babId);
+  if(!bab) return;
+  const soal = bab.soals[idx];
+  if(!soal){showResult(babId);return;}
+  state.currentSoal=idx;
+  document.getElementById('topbarTitle').textContent=bab.title;
+  document.getElementById('topbarCrumb').textContent=`${idx+1}/${bab.soals.length}`;
+  closeSidebar();
+
+  const pct = Math.round(idx/bab.soals.length*100);
+  const ans  = (state.answers[babId]||{})[idx];
+  const prevAnswer = ans?.text||'';
+  const alreadyDone = ans?.done||false;
+
+  document.getElementById('contentArea').innerHTML=`
+    <div class="quiz-view">
+      <div class="quiz-progress-bar">
+        <div class="qpb-top">
+          <span class="qpb-label">Soal ${idx+1} dari ${bab.soals.length}</span>
+          <span class="qpb-pct">${pct}%</span>
+        </div>
+        <div class="qpb-track"><div class="qpb-fill" id="qpbFill" style="width:${pct}%"></div></div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-card-hdr">
+          <div class="q-num-circle">${idx+1}</div>
+          <div class="q-hdr-info">
+            <div class="q-hdr-topic">${soal.topic}</div>
+            <div class="q-hdr-text">${soal.text}</div>
+          </div>
+        </div>
+        <div class="q-body">
+          <textarea class="essay-area" id="essayInput" placeholder="Tulis jawaban Anda di sini…" rows="5" oninput="checkEssay()">${prevAnswer}</textarea>
+          <div class="essay-hint">✏️ Tulis poin-poin utama jawaban Anda, lalu lihat pembahasan lengkap.</div>
+          <button class="btn-submit" id="btnSubmit" onclick="submitAnswer('${babId}',${idx})" ${prevAnswer.trim().length<3?'disabled':''}>
+            ${alreadyDone?'Lihat Pembahasan Lagi':'Lihat Pembahasan'}
+          </button>
+          <div id="pembahasanArea" style="display:${alreadyDone?'block':'none'};">${alreadyDone?`<div class="pembahasan">${renderPembahasan(soal)}</div>`+renderNextBtn(babId,idx):''}</div>
+        </div>
+      </div>
+    </div>`;
+
+  if(alreadyDone){
+    // disable textarea
+    document.getElementById('essayInput').disabled=true;
+    document.getElementById('btnSubmit').style.display='none';
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderNextBtn(babId, idx){
+  const bab = state.babs.find(b=>b.id===babId);
+  const isLast = idx>=bab.soals.length-1;
+  return `<button class="btn-next" onclick="${isLast?`showResult('${babId}')`:`showQuizSoal('${babId}',${idx+1})`}">${isLast?'Lihat Hasil ✓':'Soal Berikutnya →'}</button>`;
+}
+
+function checkEssay(){
+  const val = document.getElementById('essayInput')?.value?.trim()||'';
+  const btn = document.getElementById('btnSubmit');
+  if(btn) btn.disabled = val.length<3;
+}
+
+function submitAnswer(babId, idx){
+  const bab = state.babs.find(b=>b.id===babId);
+  const soal = bab.soals[idx];
+  const text = document.getElementById('essayInput').value.trim();
+
+  if(!state.answers[babId]) state.answers[babId]={};
+  state.answers[babId][idx]={text,done:true,ts:Date.now()};
+  saveState();
+  renderSidebar();
+
+  document.getElementById('essayInput').disabled=true;
+  document.getElementById('btnSubmit').style.display='none';
+
+  const area = document.getElementById('pembahasanArea');
+  area.style.display='block';
+  area.innerHTML=`<div class="pembahasan">${renderPembahasan(soal)}</div>${renderNextBtn(babId,idx)}`;
+
+  setTimeout(()=>area.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function showResult(babId){
+  const bab = state.babs.find(b=>b.id===babId);
+  if(!bab) return;
+  state.view='result';
+  const prog=getBabProgress(bab);
+  const ans=state.answers[babId]||{};
+  document.getElementById('topbarTitle').textContent='Hasil Quiz';
+  document.getElementById('topbarCrumb').textContent=bab.title;
+  renderSidebar();
+
+  const reviewRows = bab.soals.map((s,i)=>{
+    const a=ans[i];
+    return `<div class="review-item">
+      <div class="review-num">${i+1}</div>
+      <div class="review-info">
+        <div class="review-q">${s.text.substring(0,80)}…</div>
+        <div class="review-topic">${s.topic}</div>
+        ${a&&a.done?`<div class="review-ans">✅ Sudah dijawab</div>${a.text?`<div class="review-ans-text">"${a.text.substring(0,100)}…"</div>`:''}` : '<div style="font-size:11px;color:var(--warn);margin-top:4px;">⏭ Dilewati</div>'}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('contentArea').innerHTML=`
+    <div class="result-view">
+      <div class="result-hero">
+        <div class="result-circle">
+          <div class="result-num">${prog.done}/${prog.total}</div>
+          <div class="result-num-lbl">selesai</div>
+        </div>
+        <div class="result-title">${prog.pct===100?'Bab Selesai! 🎉':'Quiz Selesai!'}</div>
+        <div class="result-sub">${prog.pct===100?'Semua soal di bab ini sudah kamu jawab. Luar biasa!':'Kamu sudah menyelesaikan sesi ini. Terus berlatih!'}</div>
+        <div class="result-stats">
+          <div class="rs-box"><div class="rs-val">${prog.done}</div><div class="rs-lbl">Dijawab</div></div>
+          <div class="rs-box"><div class="rs-val">${prog.total}</div><div class="rs-lbl">Total</div></div>
+          <div class="rs-box"><div class="rs-val">${prog.pct}%</div><div class="rs-lbl">Progres</div></div>
+        </div>
+      </div>
+      <div class="section-heading">Rekap Jawaban</div>
+      <div class="review-list">${reviewRows}</div>
+      <button class="btn-ulang" onclick="startQuiz('${babId}',0)">↺ Ulangi Semua Soal</button>
+      <button class="btn-back" onclick="showBabDetail('${babId}')">← Kembali ke Bab</button>
+      <button class="btn-back" style="margin-top:8px;" onclick="showDashboard()">🏠 Dashboard</button>
+    </div>`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== SIDEBAR TOGGLE =====
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ===== TOAST =====
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ===== DEMO BAB =====
+const DEMO_BAB = {
+  id:'bab_demo',
+  title:'Tatalaksana Jalan Napas',
+  subtitle:'Obesitas Morbid & OSA Derajat 3',
+  icon:'🫁',
+  color:'#1b3a5c',
+  source:'airway_obesitas_osa.html (demo)',
+  scenario:'Laki-laki <strong>48 tahun</strong>, BB 138 kg, TB 168 cm (<strong>BMI 48,9 kg/m²</strong>), dijadwalkan laparoskopi kolesistektomi elektif. Riwayat <strong>OSA derajat 3 berat</strong> (AHI 52 kejadian/jam), CPAP 10 cmH₂O — tidak teratur. Juga menderita hipertensi, DM tipe 2, dan sindrom hipoventilasi obesitas.<br><br>Evaluasi pra-anestesia: Mallampati IV, lingkar leher 48 cm, jarak tiro-mental 5 cm, pembukaan mulut 3 jari, fleksi-ekstensi leher terbatas. SpO₂ nadir saat tidur <strong>72%</strong>.',
+  vitals:[
+    {label:'BMI',val:'48.9',unit:'kg/m²',cls:'warn'},
+    {label:'AHI',val:'52',unit:'kejadian/jam',cls:'alert'},
+    {label:'SpO₂ Nadir',val:'72%',unit:'saat tidur',cls:'alert'},
+    {label:'Ling. Leher',val:'48',unit:'cm',cls:'warn'},
+    {label:'Mallampati',val:'IV',unit:'kelas',cls:'warn'},
+    {label:'Tiro-Mental',val:'5',unit:'cm',cls:'warn'},
+  ],
+  soals:[
+    {
+      topic:'Pertanyaan 1 · Diagnosis & Patofisiologi',
+      text:'Jelaskan mengapa pasien obesitas morbid dengan OSA berat merupakan pasien "high-risk airway" dan bagaimana patofisiologi OSA memengaruhi risiko perioperatif?',
+      inti:'Pasien ini merupakan <strong>anticipated difficult airway</strong> sekaligus memiliki risiko tinggi komplikasi respirasi perioperatif akibat interaksi antara anatomi jalan napas yang terganggu, cadangan fungsional paru yang sangat terbatas, dan respons fisiologis terhadap anestesia yang diperburuk oleh OSA.',
+      poin:[
+        {label:'Patofisiologi OSA pada Obesitas',items:['<strong>Deposisi lemak parafaring:</strong> menyempitkan lumen jalan napas dan meningkatkan kolapsibilitas faringeal.','<strong>Beban mekanik diafragma:</strong> lemak intraabdominal mendorong diafragma ke atas, FRC turun hingga 50%.','<strong>Disfungsi otot dilator faring:</strong> hipoksia intermiten mengganggu otot genioglosus & tensor veli palatini.','<strong>Loop gain tinggi:</strong> respons kemosensorik tidak stabil → siklus apnea memanjang.']},
+        {label:'Klasifikasi OSA & Perubahan Fisiologi Paru',table:{head:['Parameter','Perubahan','Dampak Klinis'],rows:[['FRC','↓ 30–50%','Desaturasi cepat saat apnea'],['ERV','↓↓','Air trapping, closing capacity > FRC'],['Konsumsi O₂','↑','Cadangan O₂ cepat habis'],['AHI ≥30 (pasien: 52)','Berat / Derajat 3','ICU/HDU wajib']]}}
+      ],
+      callout:{type:'danger',icon:'⚠️',text:'<strong>Poin Kritis:</strong> Setelah induksi & paralisis, waktu aman apnea hanya <strong>1–3 menit</strong> (vs 5–10 menit pasien normal) — bahkan setelah preoksigenasi optimal.'},
+      refs:['Butterworth JF IV. Morgan & Mikhail\'s Clinical Anesthesiology. 7th ed. 2022. Ch. 44.','Miller RD. Miller\'s Anesthesia. 9th ed. Ch. 71.','Chung F, et al. STOP-Bang. Chest. 2016;149(3):631–638.']
+    },
+    {
+      topic:'Pertanyaan 2 · Penilaian Pra-Anestesia',
+      text:'Bagaimana melakukan penilaian pra-anestesia yang komprehensif dan apa saja alat ukur yang digunakan untuk mengidentifikasi dan mengkuantifikasi risiko jalan napas pada pasien ini?',
+      inti:'Penilaian pra-anestesia harus mencakup evaluasi multidimensi: riwayat klinis OSA, skor prediksi kesulitan intubasi, pemeriksaan fisik terstruktur, uji fungsional paru, dan penilaian kardiovaskular.',
+      poin:[
+        {label:'STOP-BANG Pasien Ini (Skor 7/8)',table:{head:['Komponen','Pasien'],rows:[['S – Snoring','✅ Ya'],['T – Tired','✅ Ya'],['O – Observed apnea','✅ Ya'],['P – Pressure (HT)','✅ Ya'],['B – BMI > 35','✅ Ya (48.9)'],['A – Age > 50','❌ Tidak (48 th)'],['N – Neck > 43cm','✅ Ya (48 cm)'],['G – Gender (L)','✅ Ya'],['TOTAL','7/8 → Risiko Sangat Tinggi']]}},
+        {label:'Mnemonic LEMON',items:['<strong>L</strong>ook externally — obesitas, leher pendek-tebal','<strong>E</strong>valuate 3-3-2 rule — jarak tiro-mental borderline (5 cm)','<strong>M</strong>allampati — Kelas IV, uvula tidak terlihat','<strong>O</strong>bstruction/Obesity — faktor independen kesulitan laringoskopi','<strong>N</strong>eck mobility — terbatas; sniffing position tidak optimal']},
+        {label:'Evaluasi Sistemik',items:['<strong>EKG:</strong> RVH, aritmia, iskemia','<strong>ABG:</strong> evaluasi hiperkapnia kronis (PaCO₂ > 45 mmHg = OHS)','<strong>Spirometri:</strong> pola restriktif pada OHS','<strong>Lab:</strong> polisitemia (Hb↑), glukosa, fungsi tiroid']}
+      ],
+      callout:{type:'warning',icon:'⚡',text:'<strong>OHS:</strong> Didiagnosis bila BMI ≥30 + PaCO₂ ≥45 mmHg. Pasien ini WAJIB evaluasi ABG untuk eksklusi OHS yang memperburuk risiko secara signifikan.'},
+      refs:['ASA Difficult Airway Guidelines. Anesthesiology. 2022;136(1):31–81.','Reed MJ. The LEMON approach. Emerg Med J. 2004;21:248.','Morgan & Mikhail Ch. 19 & 44.']
+    },
+    {
+      topic:'Pertanyaan 3 · Manajemen Intraoperatif',
+      text:'Jelaskan secara lengkap algoritma dan strategi tatalaksana jalan napas intraoperatif pada pasien ini, mulai dari persiapan, preoksigenasi, teknik intubasi, hingga pemilihan agen anestesia yang tepat.',
+      inti:'Manajemen jalan napas mengikuti prinsip "Plan A, B, C, D" dari ASA Difficult Airway Algorithm 2022, dengan fokus pada preoksigenasi optimal, posisi yang benar, dan kesiapan penuh untuk failed intubation <em>sebelum</em> induksi dimulai.',
+      poin:[
+        {label:'SOAP-ME Checklist',table:{head:['Komponen','Detail'],rows:[['S – Suction','Kuat, siap di sisi kepala'],['O – Oxygen','NRB, CPAP/NIV standby'],['A – Airway','VL, FOB, ETT berbagai ukuran, SGA, bougie, kit krikotirotomi'],['P – Pharmacology','Propofol/ketamin, suksinilkolin/rokuronum, sugammadex, vasopressor'],['M – Monitoring','EKG, NIBP, SpO₂, EtCO₂, TOF'],['E – Equipment','Meja ramping position']]}},
+        {label:'Dosis Obat (Berbasis Berat Badan)',table:{head:['Obat','Dasar Dosis','Catatan'],rows:[['Propofol (induksi)','LBW','1–2 mg/kg LBW; titrasi pelan'],['Suksinilkolin','TBW','1.5 mg/kg TBW'],['Rokuronum (RSI)','LBW','1.2 mg/kg LBW'],['Sugammadex','TBW','16 mg/kg TBW (emergensi)'],['Fentanil','LBW','Minimalisasi! Multimodal analgesia'],['Midazolam','LBW','HINDARI pada OSA berat']]}},
+        {label:'VL vs Laringoskopi Langsung',items:['<strong>Videolaringoskopi (VL)</strong> adalah pilihan pertama','First-pass success VL: ~85–95% vs DL: ~70–75% pada difficult airway','Anticipated Difficult Airway → pertimbangkan <strong>Awake FOB atau Awake VL</strong>','LBW pasien ≈ <strong>72 kg</strong> (formula Devine)']}
+      ],
+      callout:{type:'info',icon:'🔑',text:'Plan A: VL → Plan B: SGA (ProSeal/LMA Supreme) → Plan C: Krikotirotomi bedah. Jangan > 2 upaya intubasi tanpa memberikan oksigenasi!'},
+      refs:['ASA Difficult Airway Guidelines. Anesthesiology. 2022;136:31–81.','Morgan & Mikhail Ch. 19 & 44. 7th ed.','Miller\'s Anesthesia Ch. 55. 9th ed.']
+    },
+    {
+      topic:'Pertanyaan 4 · Ventilasi Intraoperatif',
+      text:'Bagaimana strategi ventilasi mekanik intraoperatif yang optimal untuk pasien obesitas morbid dengan OSA, dan apa parameter ventilasi yang perlu dimonitor?',
+      inti:'Ventilasi pasien obesitas morbid memerlukan strategi khusus: mempertahankan oksigenasi adekuat, mencegah atelektasis, meminimalkan VALI, dan mempertahankan hemodinamik stabil.',
+      poin:[
+        {label:'Lung-Protective Ventilation — Parameter Target',table:{head:['Parameter','Target','Alasan'],rows:[['Tidal Volume (Vt)','6–8 mL/kg <strong>IBW</strong>','Berdasarkan TBW → barotrauma!'],['PEEP','8–12 cmH₂O','Rekruitmen alveoli, cegah atelektasis'],['Recruitment maneuver','30 cmH₂O × 30 detik','Buka alveoli kolaps pasca-intubasi'],['FiO₂','Turunkan bertahap; SpO₂ ≥ 95%','FiO₂ tinggi → atelektasis absorpsi'],['Plateau pressure','< 28 cmH₂O','Indikator lung stress'],['Driving pressure','< 15 cmH₂O (Pplat − PEEP)','Prediktor outcome paru terbaik']]}},
+        {label:'Perhitungan IBW & Vt',items:['<strong>Formula Devine ♂:</strong> IBW = 50 + 2.3 × (tinggi inci − 60)','Pasien 168 cm = 66 inci → IBW = 50 + 2.3 × 6 = <strong>~63.8 kg</strong>','Vt target = 6 × 63.8 = <strong>~383 mL</strong> (bukan 6 × 138 = 828 mL yang berbahaya!)']},
+        {label:'TIVA vs Agen Volatil',table:{head:['Aspek','Volatil','TIVA (Propofol)'],rows:[['Recovery','Desfluran tercepat (koef. 0.45)','Predictable recovery'],['Akumulasi','Desfluran minimal','Dosis LBW, akumulasi minimal'],['Rekomendasi','Desfluran/sevofluran bisa digunakan','<strong>TIVA lebih disukai</strong> pada OSA berat']]}}
+      ],
+      callout:{type:'danger',icon:'⚠️',text:'<strong>KRITIS:</strong> Laparoskopi + pneumoperitoneum CO₂ + Trendelenburg → beban ekstra pada diafragma. Naikkan PEEP dan monitor Pplat ketat selama fase ini.'},
+      refs:['Morgan & Mikhail Ch. 44 & 57. 7th ed.','Futier E, et al. Low-tidal-volume ventilation. NEJM. 2013;369:428.','Barash PG. Clinical Anesthesia. 8th ed. Ch. 40.']
+    },
+    {
+      topic:'Pertanyaan 5 · Manajemen Pascaoperasi',
+      text:'Apa saja komplikasi respirasi pascaoperasi yang dapat terjadi pada pasien ini, bagaimana kriteria ekstubasi yang aman, dan apa strategi manajemen nyeri yang direkomendasikan?',
+      inti:'Fase pascaoperasi adalah periode <strong>PALING BERBAHAYA</strong> pada pasien OSA. Risiko komplikasi respirasi meningkat 2–4× lipat dalam 24 jam pertama akibat efek residu opioid, relaksan, dan sedatif yang berinteraksi dengan mekanisme OSA.',
+      poin:[
+        {label:'Kriteria Ekstubasi Aman',table:{head:['Kriteria','Target','Catatan OSA'],rows:[['Kesadaran','Sadar penuh, ikuti perintah','MUST fully awake'],['TOF ratio','≥ 0.9','Gunakan sugammadex bila ragu'],['Vt spontan','≥ 5 mL/kg IBW','Uji napas spontan ≥ 5 menit'],['SpO₂','≥ 95% dengan O₂ ≤ 4 L/mnt','< 90% saat bangun → tunda'],['Posisi','Semi-fowler 30–45°','Pertahankan FRC pasca-ekstubasi']]}},
+        {label:'Manajemen Nyeri Multimodal (Opioid-Sparing)',items:['<strong>Parasetamol</strong> 1 g IV tiap 6 jam — opioid-sparing 20–30%, aman OSA','<strong>NSAID (Ketorolak)</strong> 15–30 mg IV — opioid-sparing kuat','<strong>Ketamine dosis rendah</strong> 0.1–0.3 mg/kg IV — NMDA antagonis; pertahankan tonus jalan napas','<strong>Dexmedetomidine</strong> 0.2–0.7 mcg/kg/jam — sedasi tanpa depresi napas','<strong>Blok regional</strong> (TAP block, paravertebral) — analgesia tanpa efek sistemik']},
+        {label:'Level Perawatan Pascaoperasi',table:{head:['Level','Kriteria'],rows:[['ICU','OHS + hiperkapnia; gagal napas; hemodinamik tidak stabil'],['★ HDU (pasien ini)','OSA berat AHI ≥30; prosedur sedang-mayor; monitoring SpO₂ kontinu'],['Bangsal + monitor','OSA ringan-sedang; prosedur minor; patuh CPAP']]}}
+      ],
+      callout:{type:'success',icon:'✅',text:'Pasien ini <strong>HARUS dirawat di HDU minimum</strong> dengan monitoring SpO₂ kontinu 24 jam pertama. CPAP dilanjutkan segera setelah cukup sadar.'},
+      refs:['Morgan & Mikhail Ch. 44 & 56. 7th ed.','Seet E, Chung F. Can J Anaesth. 2010;57:849–864.','Stoelting RK. Pharmacology in Anesthetic Practice. 5th ed.']
+    }
+  ]
+};
+
+if(state.babs.length === 0){
+  state.babs.push(DEMO_BAB);
+  saveState();
+}
+
+// ===== BAB COLORS =====
+const BAB_COLORS = [
+  '#1b3a5c','#1a7a4a','#8e1a0e','#5a1e8e','#1a5c8a','#7a4a1a','#1a4a5c','#4a1a7a'
+];
+const BAB_ICONS = ['🫁','🫀','💉','🧠','🩺','⚕️','🔬','📋'];
+
+// ===== PARSER =====
+function parseHTML(html, filename){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html,'text/html');
+
+  // title
+  let title = doc.querySelector('title')?.textContent || filename.replace('.html','');
+  title = title.replace('Tatalaksana ','').substring(0,50);
+
+  // scenario
+  let scenario = '';
+  const scenBox = doc.querySelector('.scenario-box');
+  if(scenBox){
+    const paras = scenBox.querySelectorAll('p');
+    paras.forEach(p=>{ scenario += p.innerHTML + '<br><br>'; });
+  }
+
+  // vitals
+  let vitals = [];
+  doc.querySelectorAll('.vital-item').forEach(vi=>{
+    const label = vi.querySelector('.label')?.textContent?.trim() || vi.querySelector('.vital-label')?.textContent?.trim() || '';
+    const val   = vi.querySelector('.value')?.textContent?.trim() || vi.querySelector('.vital-val')?.textContent?.trim() || '';
+    const unit  = vi.querySelector('.unit')?.textContent?.trim()  || vi.querySelector('.vital-unit')?.textContent?.trim() || '';
+    const cls   = vi.classList.contains('alert') ? 'alert' : vi.classList.contains('warn') ? 'warn' : '';
+    if(label && val) vitals.push({label,val,unit,cls});
+  });
+
+  // questions
+  let soals = [];
+  doc.querySelectorAll('.question-card').forEach(card=>{
+    const topicEl = card.querySelector('.q-label');
+    const textEl  = card.querySelector('.q-title');
+    const intiEl  = card.querySelector('.answer-intro');
+    if(!textEl) return;
+
+    const topic = topicEl?.textContent?.trim() || '';
+    const text  = textEl?.textContent?.trim() || '';
+    const inti  = intiEl?.innerHTML || '';
+
+    // poin - section labels + following content
+    let poin = [];
+    const body = card.querySelector('.q-body');
+    if(body){
+      const sectionLabels = body.querySelectorAll('.section-label');
+      sectionLabels.forEach(sl=>{
+        const lbl = sl.textContent.trim();
+        let items=[], tableData=null;
+        let el = sl.nextElementSibling;
+        while(el && !el.classList.contains('section-label') && !el.classList.contains('citation-box') && !el.classList.contains('callout')){
+          if(el.tagName==='TABLE'||el.querySelector('table')){
+            const tbl = el.tagName==='TABLE'?el:el.querySelector('table');
+            const head=[], rows=[];
+            tbl.querySelectorAll('thead th').forEach(th=>head.push(th.textContent.trim()));
+            tbl.querySelectorAll('tbody tr').forEach(tr=>{
+              const r=[];
+              tr.querySelectorAll('td').forEach(td=>r.push(td.innerHTML.trim()));
+              if(r.length) rows.push(r);
+            });
+            if(head.length) tableData={head,rows};
+          } else if(el.classList&&el.classList.contains('step-list')){
+            el.querySelectorAll('.step-content').forEach(sc=>items.push(sc.innerHTML.trim()));
+          } else if(el.tagName==='UL'||el.tagName==='OL'){
+            el.querySelectorAll('li').forEach(li=>items.push(li.innerHTML.trim()));
+          }
+          el=el.nextElementSibling;
+        }
+        if(items.length||tableData) poin.push({label:lbl,items:items.length?items:undefined,table:tableData||undefined});
+      });
+    }
+
+    // callout
+    let callout = null;
+    const calloutEl = card.querySelector('.callout-danger,.callout-warning,.callout-info,.callout-success');
+    if(calloutEl){
+      const icon = calloutEl.querySelector('.callout-icon')?.textContent||'ℹ️';
+      const bodyEl = calloutEl.querySelector('div:not(.callout-icon)');
+      const text2 = bodyEl ? bodyEl.innerHTML : '';
+      const type = calloutEl.classList.contains('callout-danger')?'danger':
+                   calloutEl.classList.contains('callout-warning')?'warning':
+                   calloutEl.classList.contains('callout-success')?'success':'info';
+      callout = {type,icon:icon.trim(),text:text2};
+    }
+
+    // refs
+    let refs = [];
+    card.querySelectorAll('.citation-box .cite-item, .cite-item').forEach(ci=>{
+      refs.push(ci.textContent.replace('•','').trim());
+    });
+
+    soals.push({topic,text,inti,poin,callout,refs});
+  });
+
+  if(soals.length===0){
+    // fallback: cari dari h3, heading, dll
+    doc.querySelectorAll('h2,h3').forEach(h=>{
+      const t=h.textContent.trim();
+      if(t.length>20&&t.length<300){ soals.push({topic:'Pertanyaan',text:t,inti:'',poin:[],callout:null,refs:[]}); }
+    });
+  }
+
+  return {
+    id:'bab_'+Date.now()+'_'+Math.random().toString(36).slice(2),
+    title,
+    subtitle:filename,
+    icon: BAB_ICONS[state.babs.length % BAB_ICONS.length],
+    color: BAB_COLORS[state.babs.length % BAB_COLORS.length],
+    source:filename,
+    scenario,
+    vitals,
+    soals
+  };
+}
+
+// ===== FILE UPLOAD =====
+function triggerUpload(){ document.getElementById('fileInput').click(); }
+
+function handleFiles(e){
+  const files = Array.from(e.target.files);
+  if(!files.length) return;
+  let loaded = 0;
+  files.forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      try{
+        const bab = parseHTML(ev.target.result, file.name);
+        if(bab.soals.length===0){
+          showToast('⚠️ Tidak ada soal terdeteksi di '+file.name);
+        } else {
+          // check duplicate
+          const exists = state.babs.find(b=>b.source===file.name);
+          if(exists){
+            showToast('⚠️ File '+file.name+' sudah ada');
+          } else {
+            state.babs.push(bab);
+            saveState();
+            renderSidebar();
+            showToast('✅ Bab "'+bab.title+'" berhasil ditambahkan ('+bab.soals.length+' soal)');
+            loaded++;
+          }
+        }
+      }catch(err){
+        showToast('❌ Gagal memproses '+file.name);
+      }
+    };
+    reader.readAsText(file,'UTF-8');
+  });
+  e.target.value='';
+}
+
+// drag & drop on upload zone
+function setupDrop(el){
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag');});
+  el.addEventListener('dragleave',()=>el.classList.remove('drag'));
+  el.addEventListener('drop',e=>{
+    e.preventDefault();el.classList.remove('drag');
+    const files = Array.from(e.dataTransfer.files).filter(f=>f.name.endsWith('.html')||f.name.endsWith('.htm'));
+    if(files.length){
+      const fakeEv = {target:{files,value:''}};
+      handleFiles(fakeEv);
+    }
+  });
+}
+
+// ===== PROGRESS =====
+function getBabProgress(bab){
+  const ans = state.answers[bab.id]||{};
+  const done = Object.keys(ans).filter(k=>ans[k]&&ans[k].done).length;
+  return {done, total:bab.soals.length, pct: bab.soals.length? Math.round(done/bab.soals.length*100):0};
+}
+
+// ===== SIDEBAR =====
+function renderSidebar(){
+  const list = document.getElementById('sidebarList');
+  list.innerHTML = '';
+
+  // Dashboard item
+  const dashItem = document.createElement('div');
+  dashItem.className='bab-item'+(state.view==='dashboard'?' active':'');
+  dashItem.innerHTML=`<div class="bab-item-inner"><div class="bab-icon" style="background:rgba(232,160,32,0.15);">🏠</div><div class="bab-info"><div class="bab-name">Dashboard</div><div class="bab-meta">${state.babs.length} bab tersedia</div></div></div>`;
+  dashItem.onclick=()=>showDashboard();
+  list.appendChild(dashItem);
+
+  state.babs.forEach((bab,i)=>{
+    const prog = getBabProgress(bab);
+    const item = document.createElement('div');
+    item.className='bab-item'+(state.currentBab===bab.id&&state.view!=='dashboard'?' active':'');
+    item.innerHTML=`
+      <div class="bab-item-inner">
+        <div class="bab-icon" style="background:${bab.color}22;">${bab.icon}</div>
+        <div class="bab-info">
+          <div class="bab-name">${bab.title}</div>
+          <div class="bab-meta">${prog.done}/${prog.total} soal${prog.pct===100?' · ✅':''}</div>
+          <div class="bab-progress-mini"><div class="bab-progress-mini-fill" style="width:${prog.pct}%"></div></div>
+        </div>
+      </div>`;
+    item.onclick=()=>showBabDetail(bab.id);
+    list.appendChild(item);
+  });
+}
+
+// ===== RENDER PEMBAHASAN =====
+function renderPembahasan(soal){
+  let html=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;font-size:16px;">📋</div>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--success);">Pembahasan Lengkap</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);">Kunci Jawaban & Penjelasan</div>
+      </div>
+    </div>
+    <div class="answer-key">
+      <div class="ak-label">Jawaban Inti</div>
+      <div class="ak-body">${soal.inti||'Lihat penjelasan di bawah.'}</div>
+    </div>`;
+
+  (soal.poin||[]).forEach(p=>{
+    html+=`<div class="detail-block"><div class="db-hdr">${p.label}</div><div class="db-body">`;
+    if(p.items&&p.items.length){
+      html+='<ul>'+p.items.map(i=>`<li>${i}</li>`).join('')+'</ul>';
+    }
+    if(p.table){
+      html+=`<div class="tbl-wrap"><table class="mini-tbl"><thead><tr>${p.table.head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+      p.table.rows.forEach(r=>{html+='<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>';});
+      html+='</tbody></table></div>';
+    }
+    html+=`</div></div>`;
+  });
+
+  if(soal.callout){
+    const ct=soal.callout;
+    html+=`<div class="callout callout-${ct.type}"><span class="callout-icon">${ct.icon}</span><div>${ct.text}</div></div>`;
+  }
+
+  if(soal.refs&&soal.refs.length){
+    html+=`<div class="cite-block"><div class="cite-lbl">📚 Referensi</div>`;
+    soal.refs.forEach(r=>{html+=`<div class="cite-item">• ${r}</div>`;});
+    html+=`</div>`;
+  }
+
+  return html;
+}
+
+// ===== VIEWS =====
+function showDashboard(){
+  state.view='dashboard';
+  state.currentBab=null;
+  document.getElementById('topbarTitle').textContent='Dashboard';
+  document.getElementById('topbarCrumb').textContent='';
+  renderSidebar();
+  closeSidebar();
+
+  const totalSoals = state.babs.reduce((a,b)=>a+b.soals.length,0);
+  const totalDone  = state.babs.reduce((a,b)=>{
+    const p=getBabProgress(b);return a+p.done;
+  },0);
+  const totalPct = totalSoals? Math.round(totalDone/totalSoals*100):0;
+
+  let babCards = state.babs.map(bab=>{
+    const prog=getBabProgress(bab);
+    const badge = prog.pct===100
+      ? `<span class="badge-done">✅ Selesai</span>`
+      : prog.done===0 ? `<span class="badge-new">Baru</span>` : `<span class="badge-new">${prog.done}/${prog.total}</span>`;
+    return `<div class="bab-card" onclick="showBabDetail('${bab.id}')">
+      <div class="bab-card-top">
+        <div class="bab-card-icon" style="background:${bab.color}18;font-size:24px;">${bab.icon}</div>
+        <div class="bab-card-info">
+          <div class="bab-card-title">${bab.title}</div>
+          <div class="bab-card-sub">${bab.soals.length} soal · ${bab.subtitle||bab.source}</div>
+        </div>
+        ${badge}
+      </div>
+      <div class="bab-card-bottom">
+        <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${prog.done}/${prog.total}</div>
+        <div class="progress-track"><div class="progress-fill" style="width:${prog.pct}%"></div></div>
+        <div class="progress-pct">${prog.pct}%</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  let uploadSection = '';
+  if(state.babs.length<2){
+    uploadSection=`
+      <div class="section-heading" style="margin-top:24px;">Tambah Bab Baru</div>
+      <div class="upload-zone" id="uploadZone" onclick="triggerUpload()">
+        <div class="upload-zone-icon">📂</div>
+        <div class="upload-zone-title">Upload file HTML soal</div>
+        <div class="upload-zone-sub">Seret & lepas file HTML ke sini, atau klik untuk memilih.<br>Format yang didukung: file HTML dengan kelas <code>question-card</code> / <code>q-title</code>.</div>
+      </div>`;
+  }
+
+  document.getElementById('contentArea').innerHTML=`
+    <div class="dashboard-hero">
+      <h2>Selamat Belajar, <span>Dokter! 👨‍⚕️</span></h2>
+      <p>Platform belajar anestesiologi berbasis kasus klinis. Upload file HTML soal dan mulai berlatih.</p>
+      <div class="dashboard-stats">
+        <div class="dash-stat"><div class="dash-stat-val">${state.babs.length}</div><div class="dash-stat-lbl">Bab</div></div>
+        <div class="dash-stat"><div class="dash-stat-val">${totalSoals}</div><div class="dash-stat-lbl">Total Soal</div></div>
+        <div class="dash-stat"><div class="dash-stat-val">${totalPct}%</div><div class="dash-stat-lbl">Progres</div></div>
+      </div>
+    </div>
+    <div class="section-heading">Daftar Bab</div>
+    <div class="bab-grid">${babCards||'<p style="color:var(--muted);font-size:13px;padding:12px 0;">Belum ada bab. Upload file HTML soal untuk memulai.</p>'}</div>
+    ${uploadSection}
+  `;
+
+  const uploadZone = document.getElementById('uploadZone');
+  if(uploadZone) setupDrop(uploadZone);
+}
+
+function showBabDetail(babId){
+  const bab = state.babs.find(b=>b.id===babId);
+  if(!bab) return;
+  state.view='bab';
+  state.currentBab=babId;
+  document.getElementById('topbarTitle').textContent=bab.title;
+  document.getElementById('topbarCrumb').textContent=bab.soals.length+' soal';
+  renderSidebar();
+  closeSidebar();
+
+  const prog = getBabProgress(bab);
+  const ans = state.answers[babId]||{};
+
+  let vitalsHtml='';
+  if(bab.vitals&&bab.vitals.length){
+    vitalsHtml=`<div class="vital-grid">${bab.vitals.map(v=>`
+      <div class="vital-item ${v.cls||''}">
+        <div class="vital-label">${v.label}</div>
+        <div class="vital-val">${v.val}</div>
+        <div class="vital-unit">${v.unit}</div>
+      </div>`).join('')}</div>`;
+  }
+
+  let scenarioHtml='';
+  if(bab.scenario){
+    scenarioHtml=`
+      <div class="scenario-card">
+        <div class="scenario-card-hdr"><div class="dot"></div><span>Skenario Kasus Klinis</span></div>
+        <div class="scenario-body"><p>${bab.scenario}</p>${vitalsHtml}</div>
+      </div>`;
+  }
+
+  const soalRows = bab.soals.map((s,i)=>{
+    const isDone = ans[i]&&ans[i].done;
+    return `<div class="soal-row ${isDone?'done':''}" onclick="startQuiz('${babId}',${i})">
+      <div class="soal-num">${i+1}</div>
+      <div class="soal-info">
+        <div class="soal-topic">${s.topic}</div>
+        <div class="soal-text">${s.text.substring(0,90)}…</div>
+        ${isDone?`<div class="soal-status">✅ Sudah dijawab</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  const btnLabel = prog.done===prog.total&&prog.total>0 ? '↺ Ulangi Semua Soal' : prog.done===0 ? '▶ Mulai Quiz' : '▶ Lanjutkan Quiz';
+
+  document.getElementById('contentArea').innerHTML=`
+    <div class="bab-detail">
+      <div class="bab-hero" style="background:linear-gradient(135deg,${bab.color},${bab.color}cc);">
+        <div class="bab-hero-badge">${bab.icon} Anestesiologi</div>
+        <h2>${bab.title}</h2>
+        <p>${bab.subtitle||bab.source}</p>
+        <div class="bab-hero-stats">
+          <div class="bab-stat-pill"><span class="dot"></span>${bab.soals.length} Soal Essay</div>
+          <div class="bab-stat-pill"><span class="dot"></span>${prog.done} Selesai</div>
+          <div class="bab-stat-pill"><span class="dot"></span>${prog.pct}% Progres</div>
+        </div>
+      </div>
+      ${scenarioHtml}
+      <button class="btn-mulai" onclick="startQuiz('${babId}',${prog.done<prog.total?prog.done:0})">${btnLabel}</button>
+      <div class="section-heading">Daftar Soal</div>
+      <div class="soal-list">${soalRows}</div>
+    </div>`;
+}
+
+function startQuiz(babId, startIdx){
+  const bab = state.babs.find(b=>b.id===babId);
+  if(!bab) return;
+  state.view='quiz';
+  state.currentBab=babId;
+  state.currentSoal=startIdx||0;
+  renderSidebar();
+  showQuizSoal(babId, state.currentSoal);
+}
+
+function showQuizSoal(babId, idx){
+  const bab = state.babs.find(b=>b.id===babId);
+  if(!bab) return;
+  const soal = bab.soals[idx];
+  if(!soal){showResult(babId);return;}
+  state.currentSoal=idx;
+  document.getElementById('topbarTitle').textContent=bab.title;
+  document.getElementById('topbarCrumb').textContent=`${idx+1}/${bab.soals.length}`;
+  closeSidebar();
+
+  const pct = Math.round(idx/bab.soals.length*100);
+  const ans  = (state.answers[babId]||{})[idx];
+  const prevAnswer = ans?.text||'';
+  const alreadyDone = ans?.done||false;
+
+  document.getElementById('contentArea').innerHTML=`
+    <div class="quiz-view">
+      <div class="quiz-progress-bar">
+        <div class="qpb-top">
+          <span class="qpb-label">Soal ${idx+1} dari ${bab.soals.length}</span>
+          <span class="qpb-pct">${pct}%</span>
+        </div>
+        <div class="qpb-track"><div class="qpb-fill" id="qpbFill" style="width:${pct}%"></div></div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-card-hdr">
+          <div class="q-num-circle">${idx+1}</div>
+          <div class="q-hdr-info">
+            <div class="q-hdr-topic">${soal.topic}</div>
+            <div class="q-hdr-text">${soal.text}</div>
+          </div>
+        </div>
+        <div class="q-body">
+          <textarea class="essay-area" id="essayInput" placeholder="Tulis jawaban Anda di sini…" rows="5" oninput="checkEssay()">${prevAnswer}</textarea>
+          <div class="essay-hint">✏️ Tulis poin-poin utama jawaban Anda, lalu lihat pembahasan lengkap.</div>
+          <button class="btn-submit" id="btnSubmit" onclick="submitAnswer('${babId}',${idx})" ${prevAnswer.trim().length<3?'disabled':''}>
+            ${alreadyDone?'Lihat Pembahasan Lagi':'Lihat Pembahasan'}
+          </button>
+          <div id="pembahasanArea" style="display:${alreadyDone?'block':'none'};">${alreadyDone?`<div class="pembahasan">${renderPembahasan(soal)}</div>`+renderNextBtn(babId,idx):''}</div>
+        </div>
+      </div>
+    </div>`;
+
+  if(alreadyDone){
+    // disable textarea
+    document.getElementById('essayInput').disabled=true;
+    document.getElementById('btnSubmit').style.display='none';
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderNextBtn(babId, idx){
+  const bab = state.babs.find(b=>b.id===babId);
+  const isLast = idx>=bab.soals.length-1;
+  return `<button class="btn-next" onclick="${isLast?`showResult('${babId}')`:`showQuizSoal('${babId}',${idx+1})`}">${isLast?'Lihat Hasil ✓':'Soal Berikutnya →'}</button>`;
+}
+
+function checkEssay(){
+  const val = document.getElementById('essayInput')?.value?.trim()||'';
+  const btn = document.getElementById('btnSubmit');
+  if(btn) btn.disabled = val.length<3;
+}
+
+function submitAnswer(babId, idx){
+  const bab = state.babs.find(b=>b.id===babId);
+  const soal = bab.soals[idx];
+  const text = document.getElementById('essayInput').value.trim();
+
+  if(!state.answers[babId]) state.answers[babId]={};
+  state.answers[babId][idx]={text,done:true,ts:Date.now()};
+  saveState();
+  renderSidebar();
+
+  document.getElementById('essayInput').disabled=true;
+  document.getElementById('btnSubmit').style.display='none';
+
+  const area = document.getElementById('pembahasanArea');
+  area.style.display='block';
+  area.innerHTML=`<div class="pembahasan">${renderPembahasan(soal)}</div>${renderNextBtn(babId,idx)}`;
+
+  setTimeout(()=>area.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function showResult(babId){
+  const bab = state.babs.find(b=>b.id===babId);
+  if(!bab) return;
+  state.view='result';
+  const prog=getBabProgress(bab);
+  const ans=state.answers[babId]||{};
+  document.getElementById('topbarTitle').textContent='Hasil Quiz';
+  document.getElementById('topbarCrumb').textContent=bab.title;
+  renderSidebar();
+
+  const reviewRows = bab.soals.map((s,i)=>{
+    const a=ans[i];
+    return `<div class="review-item">
+      <div class="review-num">${i+1}</div>
+      <div class="review-info">
+        <div class="review-q">${s.text.substring(0,80)}…</div>
+        <div class="review-topic">${s.topic}</div>
+        ${a&&a.done?`<div class="review-ans">✅ Sudah dijawab</div>${a.text?`<div class="review-ans-text">"${a.text.substring(0,100)}…"</div>`:''}` : '<div style="font-size:11px;color:var(--warn);margin-top:4px;">⏭ Dilewati</div>'}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('contentArea').innerHTML=`
+    <div class="result-view">
+      <div class="result-hero">
+        <div class="result-circle">
+          <div class="result-num">${prog.done}/${prog.total}</div>
+          <div class="result-num-lbl">selesai</div>
+        </div>
+        <div class="result-title">${prog.pct===100?'Bab Selesai! 🎉':'Quiz Selesai!'}</div>
+        <div class="result-sub">${prog.pct===100?'Semua soal di bab ini sudah kamu jawab. Luar biasa!':'Kamu sudah menyelesaikan sesi ini. Terus berlatih!'}</div>
+        <div class="result-stats">
+          <div class="rs-box"><div class="rs-val">${prog.done}</div><div class="rs-lbl">Dijawab</div></div>
+          <div class="rs-box"><div class="rs-val">${prog.total}</div><div class="rs-lbl">Total</div></div>
+          <div class="rs-box"><div class="rs-val">${prog.pct}%</div><div class="rs-lbl">Progres</div></div>
+        </div>
+      </div>
+      <div class="section-heading">Rekap Jawaban</div>
+      <div class="review-list">${reviewRows}</div>
+      <button class="btn-ulang" onclick="startQuiz('${babId}',0)">↺ Ulangi Semua Soal</button>
+      <button class="btn-back" onclick="showBabDetail('${babId}')">← Kembali ke Bab</button>
+      <button class="btn-back" style="margin-top:8px;" onclick="showDashboard()">🏠 Dashboard</button>
+    </div>`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== SIDEBAR TOGGLE =====
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ===== TOAST =====
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+
+
+// ===== STATUS BAR UPDATE =====
+function updateStatusBar(){
+  const bar = document.getElementById('statusBar');
+  const txt = document.getElementById('statusText');
+  if(!bar||!txt) return;
+  if(SUPABASE_URL==='YOUR_SUPABASE_URL'){
+    bar.className='status-bar config';
+    txt.textContent='Mode Offline — isi SUPABASE_URL & KEY untuk aktifkan mode Online';
+  } else if(state.online){
+    bar.className='status-bar online';
+    txt.textContent='🌐 Online — soal & progres tersinkron ke server';
+  } else {
+    bar.className='status-bar offline';
+    txt.textContent='📱 Offline — data tersimpan lokal di perangkat ini';
+  }
+}
+
+// ===== INIT =====
+// Patch handleFiles agar juga simpan ke Supabase
+const _origHandleFiles = handleFiles;
+async function handleFiles(e){
+  const files = Array.from(e.target.files);
+  if(!files.length) return;
+  files.forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = async ev=>{
+      try{
+        const bab = parseHTML(ev.target.result, file.name);
+        if(bab.soals.length===0){
+          showToast('⚠️ Tidak ada soal terdeteksi di '+file.name);
+        } else {
+          const exists = state.babs.find(b=>b.source===file.name);
+          if(exists){ showToast('⚠️ File '+file.name+' sudah ada'); return; }
+          state.babs.push(bab);
+          saveStateLocal();
+          renderSidebar();
+          // simpan ke Supabase
+          if(state.online){
+            showToast('⏳ Mengupload "'+bab.title+'" ke server…');
+            const ok = await sb.insertBab(bab);
+            showToast(ok ? '✅ "'+bab.title+'" tersimpan online ('+bab.soals.length+' soal)' : '⚠️ Tersimpan lokal saja (cek koneksi)');
+          } else {
+            showToast('✅ "'+bab.title+'" ditambahkan ('+bab.soals.length+' soal) — mode offline');
+          }
+        }
+      }catch(err){ showToast('❌ Gagal memproses '+file.name); }
+    };
+    reader.readAsText(file,'UTF-8');
+  });
+  e.target.value='';
+}
+
+// Patch submitAnswer agar simpan progres ke Supabase
+const _origSubmitAnswer = submitAnswer;
+async function submitAnswer(babId, idx){
+  const bab = state.babs.find(b=>b.id===babId);
+  const soal = bab.soals[idx];
+  const text = document.getElementById('essayInput').value.trim();
+
+  if(!state.answers[babId]) state.answers[babId]={};
+  state.answers[babId][idx]={text,done:true,ts:Date.now()};
+  saveStateLocal();
+  renderSidebar();
+
+  // simpan progres ke Supabase (background)
+  if(state.online){ saveProgressOnline(babId, idx, text); }
+
+  document.getElementById('essayInput').disabled=true;
+  document.getElementById('btnSubmit').style.display='none';
+  const area = document.getElementById('pembahasanArea');
+  area.style.display='block';
+  area.innerHTML=`<div class="pembahasan">${renderPembahasan(soal)}</div>${renderNextBtn(babId,idx)}`;
+  setTimeout(()=>area.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+// Async init — load data dulu baru render
+(async()=>{
+  renderSidebar();
+  showDashboard();
+  await loadState();
+  // update UI setelah data loaded
+  renderSidebar();
+  showDashboard();
+  // tampilkan status koneksi
+  updateStatusBar();
+  if(SUPABASE_URL !== 'YOUR_SUPABASE_URL'){
+    if(state.online){ showToast('🌐 Terhubung ke server — mode online'); }
+    else { showToast('📱 Mode offline — data tersimpan lokal'); }
+  }
+})();
+</script>
+</body>
+</html>
